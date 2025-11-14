@@ -118,9 +118,27 @@
       mostrarEjercicio();
     }
 
+    // Función para barajar opciones y actualizar la posición correcta
+    function barajarOpciones(opciones, idxCorrecta) {
+      let arr = opciones.map((op, i) => ({op, esCorrecta: i === idxCorrecta}));
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      const nuevaPosCorrecta = arr.findIndex(o => o.esCorrecta);
+      const nuevasOpciones = arr.map(o => o.op);
+      return { nuevasOpciones, nuevaPosCorrecta };
+    }
+
     function mostrarEjercicio() {
       var e = lista[actual];
       document.getElementById('pregunta').textContent = e.p;
+
+      // Mezclar las opciones
+      const { nuevasOpciones, nuevaPosCorrecta } = barajarOpciones(e.o, e.c);
+      e.o = nuevasOpciones;
+      e.c = nuevaPosCorrecta;
+
       var opcionesHtml = '';
       for (var i = 0; i < e.o.length; i++) {
         opcionesHtml += "<label class='block border rounded px-3 py-2 cursor-pointer hover:bg-pink-50'>";
