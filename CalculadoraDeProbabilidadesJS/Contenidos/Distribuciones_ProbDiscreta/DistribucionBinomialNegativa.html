@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Distribución Binomial Negativa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-amber-50 text-gray-800">
+  <header class="bg-amber-700 text-white py-6 text-center shadow">
+    <h1 class="text-2xl font-bold">Distribución Binomial Negativa</h1>
+    <p class="text-amber-100">Diferencias con la binomial y calculadora</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+    <!-- Teoría -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-amber-700 mb-2">Concepto y diferencia</h2>
+      <p class="text-sm text-gray-700">
+        La binomial negativa modela el número de ensayos necesarios para obtener <strong>r</strong> éxitos,
+        o la probabilidad de que el r-ésimo éxito ocurra en el k-ésimo ensayo.
+        A diferencia de la binomial (que fija n), aquí <strong>r</strong> es fijo y la variable es el número de ensayos k (k ≥ r).
+      </p>
+      <p class="mt-3 text-sm">
+        Fórmula: <strong>P(K = k) = C(k−1, r−1) · p^r · (1−p)^(k−r)</strong> para k = r, r+1, ...
+      </p>
+      <img src="../../Recursos/R_ProbDiscreta/FuncionProbabilidadBiNegativa.png" alt="Binomial Negativa" class="mt-3 h-28 object-contain mx-auto">
+    </section>
+
+    <!-- Calculadora -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-amber-700 mb-3">Calculadora Binomial Negativa</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div>
+          <label class="text-sm">r (éxitos deseados)</label>
+          <input id="nb_r" type="number" min="1" class="w-full border rounded px-2 py-1" placeholder="ej. 2">
+        </div>
+        <div>
+          <label class="text-sm">p (éxito)</label>
+          <input id="nb_p" type="number" step="any" min="0" max="1" class="w-full border rounded px-2 py-1" placeholder="ej. 0.3">
+        </div>
+        <div>
+          <label class="text-sm">k (ensayos)</label>
+          <input id="nb_k" type="number" min="1" class="w-full border rounded px-2 py-1" placeholder="ej. 4">
+        </div>
+        <div>
+          <label class="text-sm">Tipo</label>
+          <select id="nb_tipo" class="w-full border rounded px-2 py-1">
+            <option value="exacto">K = k (r-ésimo en el k)</option>
+            <option value="amenos">K ≥ k (al menos k ensayos)</option>
+            <option value="amax">K ≤ k (a lo sumo k ensayos)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-4 text-center">
+        <button id="btnCalcularNB" class="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700">Calcular</button>
+      </div>
+
+      <div id="nb_result" class="mt-4 text-center font-semibold"></div>
+    </section>
+
+    <!-- Ejercicios -->
+    <section class="bg-white rounded-2xl p-5 shadow border">
+      <h2 class="text-lg font-semibold text-amber-700 mb-3">Ejercicios - Binomial Negativa</h2>
+
+      <div class="flex gap-3 mb-4">
+        <button onclick="cargarEjNB('facil')" class="bg-amber-600 text-white px-4 py-2 rounded">Fácil</button>
+        <button onclick="cargarEjNB('intermedio')" class="bg-yellow-500 text-white px-4 py-2 rounded">Intermedio</button>
+        <button onclick="cargarEjNB('dificil')" class="bg-red-600 text-white px-4 py-2 rounded">Difícil</button>
+      </div>
+
+      <div id="zonaNB" class="hidden bg-amber-50 rounded p-4 border"></div>
+    </section>
+
+    <div class="text-center mt-8">
+      <a href="DistribucionProbDisMain.html" class="text-gray-700 hover:underline">← Volver al menú de distribuciones</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-12">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">[Tu nombre]</span></p>
+  </footer>
+
+<script>
+/*************************************************************************
+ * UTILIDADES
+ *************************************************************************/
+function comb(n,k){
+  if(k<0||k>n) return 0;
+  k = Math.min(k, n-k);
+  let num=1, den=1;
+  for(let i=1;i<=k;i++){
+    num *= (n - (k - i));
+    den *= i;
+  }
+  return Math.round(num/den);
+}
+
+function negPMF(r,k,p){
+  if(k < r) return 0;
+  const c = comb(k-1, r-1);
+  return c * Math.pow(p, r) * Math.pow(1-p, k-r);
+}
+
+function formatProb4(x){
+  if(x === 0) return "0.0000";
+  if(!isFinite(x)) return String(x);
+  if(Math.abs(x) < 1e-6) return x.toExponential(3);
+  return parseFloat(x).toFixed(4);
+}
+
+/*************************************************************************
+ * NORMALIZADOR Y MEZCLADOR (mismo enfoque que en Binomial)
+ *************************************************************************/
+function normalizarOpciones(ejArray){
+  ejArray.forEach(e => {
+    e.o = e.o.map(op => {
+      const n = parseFloat(String(op).replace(",", "."));
+      if(isNaN(n)) return String(op);
+      return parseFloat(n).toFixed(4);
+    });
+  });
+}
+
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function shuffleOptions(ejArray){
+  ejArray.forEach(e => {
+    const pairs = e.o.map((opt, idx) => ({opt: String(opt), idx: idx}));
+    shuffleArray(pairs);
+    const originalCorrectIndex = e.c;
+    const newIndex = pairs.findIndex(p => p.idx === originalCorrectIndex);
+    e.o = pairs.map(p => p.opt);
+    e.c = newIndex >= 0 ? newIndex : 0;
+  });
+}
+
+/*************************************************************************
+ * EJERCICIOS (valores legibles; el normalizador convertirá a 4 decimales)
+ *************************************************************************/
+const ejercNB = {
+  facil:[
+    {p:"r=2, p=0.3: ¿P(K=4)?", o:["0.1323","0.1","0.18","0.22"], c:0, e:"C(3,1)·0.3^2·0.7^2≈0.1323"},
+    {p:"r=1, p=0.2: ¿P(K=3)?", o:["0.1280","0.2","0.0800","0.0500"], c:0, e:"(1−0.2)^2·0.2=0.1280"},
+    {p:"r=3, p=0.5: ¿P(K=5)?", o:["0.1875","0.2000","0.2500","0.1000"], c:0, e:"C(4,2)·0.5^3·0.5^2=0.1875"},
+    {p:"r=2, p=0.4: ¿P(K ≤ 4)?", o:["0.7840","0.5000","0.3000","0.2000"], c:0, e:"P(2)+P(3)+P(4)≈0.7840"},
+    {p:"r=2, p=0.1: ¿P(K=2)?", o:["0.0100","0.1000","0.2000","0.0500"], c:0, e:"0.1^2=0.01"},
+    {p:"r=4, p=0.3: ¿P(K=6)?", o:["0.0629","0.0700","0.1000","0.0400"], c:0, e:"C(5,3)·0.3^4·0.7^2≈0.0629"}
+  ],
+  intermedio:[
+    {p:"r=3, p=0.2: ¿P(K=7)?", o:["0.0204","0.0100","0.0300","0.0500"], c:0, e:"C(6,2)·0.2^3·0.8^4≈0.0204"},
+    {p:"r=5, p=0.5: ¿P(K ≤ 7)?", o:["0.8906","0.8000","0.6000","0.3000"], c:0, e:"P(5)+P(6)+P(7)≈0.8906"},
+    {p:"r=2, p=0.6: ¿P(K=3)?", o:["0.2880","0.4000","0.2000","0.5000"], c:0, e:"C(2,1)·0.6^2·0.4=0.2880"},
+    {p:"r=1, p=0.3: ¿P(K ≥ 4)?", o:["0.3430","0.2000","0.5000","0.7000"], c:0, e:"1−P(K ≤ 3)≈0.3430"}
+  ],
+  dificil:[
+    {p:"r=6, p=0.4: ¿P(K=10)?", o:["0.0360","0.0500","0.0100","0.1000"], c:0, e:"C(9,5)·0.4^6·0.6^4≈0.0360"},
+    {p:"r=8, p=0.2: ¿P(K ≤ 12)?", o:["0.9210","0.8000","0.6000","0.4000"], c:0, e:"Suma P(8..12)≈0.9210"},
+    {p:"r=3, p=0.7: ¿P(K=4)?", o:["0.3087","0.1470","0.2000","0.1000"], c:0, e:"C(3,2)·0.7^3·0.3≈0.3087"}
+  ]
+};
+
+// Aplicar normalizador y mezclar opciones
+normalizarOpciones(ejercNB.facil);
+normalizarOpciones(ejercNB.intermedio);
+normalizarOpciones(ejercNB.dificil);
+
+shuffleOptions(ejercNB.facil);
+shuffleOptions(ejercNB.intermedio);
+shuffleOptions(ejercNB.dificil);
+
+/*************************************************************************
+ * INTERACCIÓN UI
+ *************************************************************************/
+document.getElementById("btnCalcularNB").addEventListener("click", function(){
+  const r = parseInt(document.getElementById("nb_r").value,10);
+  const p = parseFloat(document.getElementById("nb_p").value);
+  const k = parseInt(document.getElementById("nb_k").value,10);
+  const tipo = document.getElementById("nb_tipo").value;
+  const out = document.getElementById("nb_result");
+
+  if(isNaN(r)||isNaN(p)||isNaN(k) || p<0 || p>1 || r<1 || k<1){
+    alert("Ingresa valores válidos para r, p y k.");
+    return;
+  }
+
+  let res = 0;
+  if(tipo === "exacto"){
+    res = negPMF(r,k,p);
+  } else if(tipo === "amenos"){
+    // sumatoria desde k hasta un tope razonable (evita loops infinitos)
+    for(let i=k;i<=k+500;i++){
+      const term = negPMF(r,i,p);
+      res += term;
+      if(term < 1e-12) break;
+    }
+  } else { // a lo sumo k
+    for(let i=r;i<=k;i++) res += negPMF(r,i,p);
+  }
+
+  out.innerHTML = "P = " + formatProb4(res);
+});
+
+/*************************************************************************
+ * QUIZ NB: lógica
+ *************************************************************************/
+let nb_idx=0, nb_score=0, nb_list=[];
+
+// cargar ejercicios
+function cargarEjNB(level){
+  nb_list = ejercNB[level].slice();
+  nb_idx = 0; nb_score = 0;
+  document.getElementById("zonaNB").classList.remove("hidden");
+  mostrarNB();
+}
+
+function mostrarNB(){
+  const e = nb_list[nb_idx];
+  document.getElementById("zonaNB").innerHTML = `
+    <div class='mb-3 font-semibold text-amber-700'>Ejercicio ${nb_idx+1} de ${nb_list.length}</div>
+    <div class='mb-3'>${e.p}</div>
+    ${e.o.map((op,i)=>`<label class='block border rounded px-3 py-2 hover:bg-amber-100'><input type='radio' name='nbop' value='${i}' class='mr-2'>${op}</label>`).join("")}
+    <div class='text-center mt-3'><button id='btnComprobarNB' class='bg-amber-600 text-white px-4 py-2 rounded'>Comprobar</button></div>
+    <div id='nb_retro' class='mt-3 text-center font-semibold'></div>
+    <div class='text-center mt-3'><button id='nb_sig' class='hidden bg-gray-700 text-white px-3 py-1 rounded'>Siguiente</button></div>
+  `;
+  document.getElementById("btnComprobarNB").onclick = comprobarNB;
+  document.getElementById("nb_sig").onclick = sigNB;
+}
+
+function comprobarNB(){
+  const sel = document.querySelector("input[name='nbop']:checked");
+  if(!sel){ alert("Selecciona una opción"); return; }
+  const e = nb_list[nb_idx];
+  const idx = parseInt(sel.value,10);
+  const retro = document.getElementById("nb_retro");
+  if(idx === e.c){
+    nb_score++;
+    retro.innerHTML = "✅ Correcto. " + e.e;
+    retro.className = "text-green-700 font-semibold";
+  } else {
+    retro.innerHTML = "❌ Incorrecto. " + e.e;
+    retro.className = "text-red-700 font-semibold";
+  }
+  document.getElementById("nb_sig").classList.remove("hidden");
+}
+
+function sigNB(){
+  nb_idx++;
+  if(nb_idx < nb_list.length) mostrarNB();
+  else {
+    document.getElementById("zonaNB").innerHTML = "<h3 class='text-center font-bold text-amber-700'>¡Terminado!</h3><p class='text-center mt-2'>Puntaje: "+nb_score+"/"+nb_list.length+"</p>";
+  }
+}
+
+</script>
+</body>
+</html>

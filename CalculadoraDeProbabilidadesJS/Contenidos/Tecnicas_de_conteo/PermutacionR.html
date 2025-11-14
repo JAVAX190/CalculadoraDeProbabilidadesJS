@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Permutaciones con r</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-emerald-50 to-teal-50 text-gray-800">
+
+  <!-- Encabezado -->
+  <header class="bg-teal-600 text-white py-6 text-center shadow-md">
+    <h1 class="text-3xl font-bold">Permutaciones con r</h1>
+    <p class="text-teal-100">Selección ordenada de subconjuntos</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+
+    <!-- Explicación teórica -->
+    <section class="mb-8 text-center">
+      <p class="text-gray-700 mb-4">
+        Las <strong>permutaciones con r</strong> se usan para determinar cuántas formas diferentes existen
+        para organizar <em>r</em> elementos dentro de un conjunto total de <em>n</em> elementos.
+      </p>
+      <img src="../../Recursos/R_TecnicasB/PermutaciónRForm.png" alt="Fórmula Permutaciones con r" class="mx-auto h-44 mb-3">
+      <p class="text-sm text-gray-600">
+        <strong>Variables:</strong>  
+        n = total de elementos, r = elementos seleccionados.  
+        <br><strong>Fórmula:</strong> P(n, r) = n! / (n - r)!
+      </p>
+    </section>
+
+    <!-- Formulario -->
+    <form id="formPermR" class="bg-white rounded-2xl shadow p-6 border max-w-md mx-auto mb-8">
+      <label class="block mb-2 font-medium text-gray-700">Total de elementos (n):</label>
+      <input type="number" id="n" class="w-full border rounded px-3 py-2 mb-4" min="1" required>
+
+      <label class="block mb-2 font-medium text-gray-700">Elementos seleccionados (r):</label>
+      <input type="number" id="r" class="w-full border rounded px-3 py-2 mb-4" min="1" required>
+
+      <button type="button" onclick="calcularPermutacionesR()" class="bg-teal-600 text-white px-5 py-2 rounded hover:bg-teal-700 transition">
+        Calcular
+      </button>
+
+      <div id="resultado" class="mt-5 text-center text-lg font-semibold text-teal-700"></div>
+      <p id="interpretacion" class="text-center text-gray-600 mt-2"></p>
+    </form>
+
+    <!-- Gráfico -->
+    <div class="bg-white p-6 rounded-2xl shadow border text-center">
+      <h3 class="text-lg font-semibold text-teal-700 mb-4">Visualización</h3>
+      <canvas id="graficoPermR" height="100"></canvas>
+    </div>
+
+    <div class="text-center mt-8">
+      <a href="TecnicasConteoMain.html" class="text-teal-600 hover:underline">← Volver al tema principal</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-10">
+    <p class="text-sm">
+      Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span>
+    </p>
+  </footer>
+
+  <script>
+    let graficoPermR = null;
+
+    function factorial(n) {
+      if (n === 0 || n === 1) return 1n;
+      let resultado = 1n;
+      for (let i = 2n; i <= BigInt(n); i++) {
+        resultado *= i;
+      }
+      return resultado;
+    }
+
+    function formatearResultado(valorBigInt) {
+      const valor = Number(valorBigInt);
+      if (valor === Infinity || valorBigInt > 1_000_000_000_000_000_000n) {
+        const exp = valorBigInt.toString().length - 1;
+        const base = valorBigInt.toString().slice(0, 3);
+        const baseNum = parseFloat(base[0] + "." + base.slice(1));
+        return baseNum.toFixed(3) + " × 10^" + exp;
+      } else if (valor > 1e9) {
+        return valor.toExponential(3).replace("e+", " × 10^").replace("e", " × 10^");
+      } else {
+        return valor.toLocaleString("en-US");
+      }
+    }
+
+    function calcularPermutacionesR() {
+      const n = parseInt(document.getElementById("n").value);
+      const r = parseInt(document.getElementById("r").value);
+      const res = document.getElementById("resultado");
+      const interp = document.getElementById("interpretacion");
+
+      if (isNaN(n) || isNaN(r) || n < 1 || r < 1 || r > n) {
+        alert("Verifica que n y r sean válidos y que r ≤ n.");
+        return;
+      }
+
+      const resultado = factorial(n) / factorial(n - r);
+      const resultadoFormateado = formatearResultado(resultado);
+
+      res.innerHTML = `Número de permutaciones posibles: <strong>${resultadoFormateado}</strong>`;
+      interp.innerText = `Esto representa las diferentes maneras de ordenar ${r} elementos dentro de un conjunto de ${n}.`;
+
+      if (graficoPermR) graficoPermR.destroy();
+
+      const ctx = document.getElementById("graficoPermR").getContext("2d");
+      graficoPermR = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["P(n, r)"],
+          datasets: [{
+            label: "Valor de P(n, r)",
+            data: [Number(resultado)],
+            backgroundColor: "rgba(13, 148, 136, 0.5)",
+            borderColor: "rgba(13, 148, 136, 1)",
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

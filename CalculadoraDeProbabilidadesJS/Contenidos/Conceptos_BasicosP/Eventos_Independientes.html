@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eventos Independientes – Ejercicios Prácticos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-green-50 to-white text-gray-800">
+  <!-- Encabezado -->
+  <header class="bg-green-700 text-white py-6 text-center shadow-md">
+    <h1 class="text-3xl font-bold">Eventos Independientes</h1>
+    <p class="text-green-100">Practica con ejercicios de probabilidad</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+
+    <!-- Introducción -->
+    <section class="text-center mb-6">
+      <p class="text-gray-700 mb-4">
+        Los <strong>eventos independientes</strong> son aquellos donde la ocurrencia de uno no afecta al otro.
+        Usa la fórmula: <strong>P(A ∩ B) = P(A) × P(B)</strong>
+      </p>
+      <img src="../../Recursos/R_ConceptosBasicosP/ReglaProductoindependientes.png" alt="Eventos independientes" class="mx-auto h-44 mb-3 rounded-xl shadow-lg">
+      <p class="text-sm text-gray-600">Selecciona una dificultad y resuelve los ejercicios.</p>
+    </section>
+
+    <!-- Selector de dificultad -->
+    <div class="flex justify-center gap-4 mb-6">
+      <button onclick="cargarEjercicios('facil')" class="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">Fácil</button>
+      <button onclick="cargarEjercicios('intermedio')" class="px-5 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600">Intermedio</button>
+      <button onclick="cargarEjercicios('dificil')" class="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Difícil</button>
+    </div>
+
+    <!-- Zona del ejercicio -->
+    <div id="zonaEjercicio" class="hidden bg-white rounded-2xl shadow p-6 border">
+      <div class="flex justify-between items-center mb-3">
+        <span id="contador" class="font-semibold text-green-700"></span>
+        <span id="puntaje" class="font-semibold text-gray-700"></span>
+      </div>
+
+      <h2 id="pregunta" class="text-lg font-semibold mb-4"></h2>
+
+      <div id="opciones" class="space-y-2 mb-4"></div>
+
+      <button onclick="comprobarRespuesta()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Comprobar respuesta</button>
+
+      <div id="retroalimentacion" class="mt-4 text-center text-lg font-semibold"></div>
+
+      <div class="mt-6 text-center">
+        <button onclick="siguienteEjercicio()" id="btnSiguiente" class="hidden bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">Siguiente</button>
+      </div>
+    </div>
+
+    <!-- Botón volver -->
+    <div class="text-center mt-8">
+      <a href="ConceptosBasicMain.html" class="text-green-700 hover:underline">← Volver al tema principal</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-10">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span></p>
+  </footer>
+
+  <script>
+    // Ejercicios (facil:15, intermedio:10, dificil:5)
+    var ejercicios = {
+      facil: [
+        { p: "Si P(A)=0.5 y P(B)=0.4, ¿P(A∩B)?", o: ["0.20","0.10","0.90","0.25"], c: 0, e: "P(A∩B)=0.5×0.4=0.20" },
+        { p: "Si P(A)=0.3 y P(B)=0.6, ¿P(A∩B)?", o: ["0.18","0.33","0.09","0.12"], c: 0, e: "0.3×0.6=0.18" },
+        { p: "Si P(A)=0.8 y P(B)=0.2, ¿P(A∩B)?", o: ["0.16","0.60","0.10","0.22"], c: 0, e: "0.8×0.2=0.16" },
+        { p: "Si P(A)=0.25 y P(B)=0.25, ¿P(A∩B)?", o: ["0.0625","0.5","0.25","0.75"], c: 0, e: "0.25×0.25=0.0625" },
+        { p: "Si P(A)=0.9 y P(B)=0.1, ¿P(A∩B)?", o: ["0.09","0.81","0.10","0.5"], c: 0, e: "0.9×0.1=0.09" },
+        { p: "P(A)=0.4, P(B)=0.4. ¿P(A∩B)?", o: ["0.16","0.08","0.20","0.32"], c: 0, e: "0.4×0.4=0.16" },
+        { p: "P(A)=0.7, P(B)=0.2. ¿P(A∩B)?", o: ["0.14","0.9","0.28","0.10"], c: 0, e: "0.7×0.2=0.14" },
+        { p: "P(A)=0.6, P(B)=0.6. ¿P(A∩B)?", o: ["0.36","0.12","0.66","0.30"], c: 0, e: "0.6×0.6=0.36" },
+        { p: "P(A)=0.2, P(B)=0.3. ¿P(A∩B)?", o: ["0.06","0.05","0.10","0.08"], c: 0, e: "0.2×0.3=0.06" },
+        { p: "P(A)=0.9, P(B)=0.5. ¿P(A∩B)?", o: ["0.45","0.35","0.4","0.25"], c: 0, e: "0.9×0.5=0.45" },
+        { p: "P(A)=0.1, P(B)=0.1. ¿P(A∩B)?", o: ["0.01","0.02","0.10","0.11"], c: 0, e: "0.1×0.1=0.01" },
+        { p: "P(A)=0.3, P(B)=0.9. ¿P(A∩B)?", o: ["0.27","0.33","0.36","0.25"], c: 0, e: "0.3×0.9=0.27" },
+        { p: "P(A)=0.5, P(B)=0.8. ¿P(A∩B)?", o: ["0.40","0.50","0.30","0.35"], c: 0, e: "0.5×0.8=0.40" },
+        { p: "P(A)=0.4, P(B)=0.9. ¿P(A∩B)?", o: ["0.36","0.44","0.49","0.32"], c: 0, e: "0.4×0.9=0.36" },
+        { p: "P(A)=0.7, P(B)=0.5. ¿P(A∩B)?", o: ["0.35","0.45","0.15","0.25"], c: 0, e: "0.7×0.5=0.35" }
+      ],
+      intermedio: [
+        { p: "Una moneda y un dado. P(sacar cara y 4)?", o: ["1/12","1/6","1/2","1/3"], c: 0, e: "1/2×1/6=1/12" },
+        { p: "Dos monedas. P(ambas sean cara)?", o: ["1/4","1/2","1/3","3/4"], c: 0, e: "1/2×1/2=1/4" },
+        { p: "Dos dados. P(sacar par en ambos)?", o: ["1/4","1/3","1/6","1/9"], c: 0, e: "3/6×3/6=1/4" },
+        { p: "P(A)=0.6, P(B)=0.5. P(A∩B)?", o: ["0.30","0.10","0.20","0.35"], c: 0, e: "0.6×0.5=0.30" },
+        { p: "P(A)=0.8, P(B)=0.7. P(A∩B)?", o: ["0.56","0.42","0.60","0.70"], c: 0, e: "0.8×0.7=0.56" },
+        { p: "Dos eventos independientes con P(A)=0.9 y P(B)=0.9", o: ["0.81","0.9","0.45","0.99"], c: 0, e: "0.9×0.9=0.81" },
+        { p: "Si P(A)=0.3, P(B)=0.8", o: ["0.24","0.10","0.20","0.32"], c: 0, e: "0.3×0.8=0.24" },
+        { p: "Si P(A)=0.25, P(B)=0.4", o: ["0.10","0.15","0.09","0.12"], c: 0, e: "0.25×0.4=0.10" },
+        { p: "Si P(A)=0.1, P(B)=0.8", o: ["0.08","0.02","0.18","0.10"], c: 0, e: "0.1×0.8=0.08" },
+        { p: "Si P(A)=0.75, P(B)=0.5", o: ["0.375","0.5","0.25","0.65"], c: 0, e: "0.75×0.5=0.375" }
+      ],
+      dificil: [
+        { p: "Dos dados: P(suma par y >8)?", o: ["5/36","10/36","9/36","8/36"], c: 0, e: "Casos favorables=5, total=36→5/36" },
+        { p: "Dos cartas de baraja: P(sacar as y luego rey con reemplazo)?", o: ["1/169","1/52","2/52","1/26"], c: 0, e: "(4/52)×(4/52)=1/169" },
+        { p: "Dos ruletas: P(sacar rojo en ambas)?", o: ["1/4","1/2","1/3","1/8"], c: 0, e: "1/2×1/2=1/4" },
+        { p: "P(A)=0.6, P(B)=0.9. P(A∩B)?", o: ["0.54","0.60","0.45","0.49"], c: 0, e: "0.6×0.9=0.54" },
+        { p: "Tres monedas: P(3 caras)?", o: ["1/8","1/4","1/2","3/8"], c: 0, e: "(1/2)^3=1/8" }
+      ]
+    };
+
+    var actual = 0;
+    var aciertos = 0;
+    var lista = [];
+    var dificultad = '';
+
+    // Cargar ejercicios de una dificultad
+    function cargarEjercicios(dif) {
+      dificultad = dif;
+      lista = ejercicios[dif].slice(); // copia del arreglo
+      actual = 0;
+      aciertos = 0;
+      document.getElementById('zonaEjercicio').classList.remove('hidden');
+      mostrarEjercicio();
+    }
+
+    // Mostrar el ejercicio actual
+    function mostrarEjercicio() {
+      var e = lista[actual];
+      document.getElementById('pregunta').textContent = e.p;
+
+      // Construir HTML de opciones sin template literals
+      var opcionesHtml = '';
+      for (var i = 0; i < e.o.length; i++) {
+        opcionesHtml += "<label class='block border rounded px-3 py-2 cursor-pointer hover:bg-green-50'>";
+        opcionesHtml += "<input type='radio' name='op' value='" + i + "' class='mr-2'>" + e.o[i];
+        opcionesHtml += "</label>";
+      }
+      document.getElementById('opciones').innerHTML = opcionesHtml;
+
+      document.getElementById('retroalimentacion').textContent = '';
+      document.getElementById('btnSiguiente').classList.add('hidden');
+      document.getElementById('contador').textContent = 'Ejercicio ' + (actual + 1) + ' de ' + lista.length;
+      document.getElementById('puntaje').textContent = 'Aciertos: ' + aciertos;
+    }
+
+    // Comprobar respuesta seleccionada
+    function comprobarRespuesta() {
+      var seleccionado = document.querySelector('input[name="op"]:checked');
+      if (!seleccionado) {
+        alert("Selecciona una opción");
+        return;
+      }
+      var e = lista[actual];
+      var idx = parseInt(seleccionado.value, 10);
+      var retro = document.getElementById('retroalimentacion');
+
+      if (idx === e.c) {
+        aciertos++;
+        retro.innerHTML = "✅ Correcto. " + e.e;
+        retro.className = "text-green-700 font-semibold mt-4";
+      } else {
+        retro.innerHTML = "❌ Incorrecto. " + e.e;
+        retro.className = "text-red-700 font-semibold mt-4";
+      }
+      document.getElementById('btnSiguiente').classList.remove('hidden');
+      document.getElementById('puntaje').textContent = 'Aciertos: ' + aciertos;
+    }
+
+    // Siguiente ejercicio o final
+    function siguienteEjercicio() {
+      actual++;
+      if (actual < lista.length) {
+        mostrarEjercicio();
+      } else {
+        var zona = document.getElementById('zonaEjercicio');
+        var finalHtml  = "<h2 class='text-2xl font-bold text-center text-green-700'>¡Has terminado!</h2>";
+        finalHtml += "<p class='text-center mt-4'>Tu puntaje final es <strong>" + aciertos + "/" + lista.length + "</strong>.</p>";
+        finalHtml += "<div class='text-center mt-6'>";
+        finalHtml += "<button onclick=\"cargarEjercicios('" + dificultad + "')\" class='bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700'>Reintentar</button>";
+        finalHtml += "</div>";
+        zona.innerHTML = finalHtml;
+      }
+    }
+  </script>
+</body>
+</html>

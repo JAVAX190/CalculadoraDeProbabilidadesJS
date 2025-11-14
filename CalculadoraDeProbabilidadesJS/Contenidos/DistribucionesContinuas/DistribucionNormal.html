@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Distribución Normal (Campana de Gauss)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-pink-50 text-gray-800">
+  <header class="bg-pink-700 text-white py-6 text-center shadow">
+    <h1 class="text-2xl font-bold">Distribución Normal (Campana de Gauss)</h1>
+    <p class="text-pink-100">Propiedades, Estandarización y Cálculo de Probabilidades</p>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-6">
+    <!-- Teoría -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-pink-700 mb-2">Propiedades principales</h2>
+      <ul class="list-disc ml-6 text-sm text-gray-700">
+        <li>Simétrica respecto a la media μ.</li>
+        <li>El 68% de los valores se encuentra dentro de ±1σ, el 95% dentro de ±2σ y el 99.7% dentro de ±3σ.</li>
+        <li>Área total bajo la curva = 1.</li>
+      </ul>
+
+      <h3 class="mt-4 text-md font-semibold text-pink-700">Estandarización</h3>
+      <p class="text-sm">Se utiliza la variable Z: <strong>Z = (X − μ) / σ</strong></p>
+      <img src="../../Recursos/R_DistrbucionContinua/DistribucionNormalTablaZ.png" alt="Fórmula normal" class="mt-3 h-28 object-contain mx-auto">
+
+      <h3 class="mt-4 text-md font-semibold text-pink-700">Usos de la tabla Z</h3>
+      <ul class="list-disc ml-6 text-sm text-gray-700">
+        <li>P(X &lt; x) = área a la izquierda de Z</li>
+        <li>P(X &gt; x) = 1 − P(X &lt; x)</li>
+        <li>P(a &lt; X &lt; b) = P(Zb) − P(Za)</li>
+      </ul>
+    </section>
+
+    <!-- Calculadora -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-pink-700 mb-3">Calculadora Normal</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div><label class="text-sm">Media (μ)</label><input id="mu" type="number" step="any" class="w-full border rounded px-2 py-1"></div>
+        <div><label class="text-sm">Desv. Est. (σ)</label><input id="sigma" type="number" step="any" class="w-full border rounded px-2 py-1"></div>
+        <div><label class="text-sm">X o a</label><input id="x1" type="number" step="any" class="w-full border rounded px-2 py-1"></div>
+        <div><label class="text-sm">b (opcional)</label><input id="x2" type="number" step="any" class="w-full border rounded px-2 py-1"></div>
+        <div>
+          <label class="text-sm">Caso</label>
+          <select id="tipo" class="w-full border rounded px-2 py-1">
+            <option value="menor">P(X &lt; x)</option>
+            <option value="mayor">P(X &gt; x)</option>
+            <option value="entre">P(a &lt; X &lt; b)</option>
+            <option value="inverso">Dado P, hallar X</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-4 text-center">
+        <button onclick="calcularNormal()" class="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700">Calcular</button>
+      </div>
+
+      <div id="resultado" class="mt-4 text-center font-semibold"></div>
+      <canvas id="graficaNormal" class="mt-6"></canvas>
+    </section>
+
+    <!-- Tabla Z -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-pink-700 mb-3">Tabla Z (extracto)</h2>
+      <div id="tablaZ" class="overflow-x-auto text-sm"></div>
+    </section>
+
+    <!-- Ejercicios -->
+    <section class="bg-white rounded-2xl p-5 shadow border">
+      <h2 class="text-lg font-semibold text-pink-700 mb-3">Ejercicios - Distribución Normal</h2>
+
+      <div class="flex gap-3 mb-4">
+        <button onclick="cargarEjNormal('facil')" class="bg-green-600 text-white px-4 py-2 rounded">Fácil</button>
+        <button onclick="cargarEjNormal('intermedio')" class="bg-yellow-500 text-white px-4 py-2 rounded">Intermedio</button>
+        <button onclick="cargarEjNormal('dificil')" class="bg-red-600 text-white px-4 py-2 rounded">Difícil</button>
+      </div>
+
+      <div id="zonaNormal" class="hidden bg-pink-50 rounded p-4 border"></div>
+    </section>
+
+    <div class="text-center mt-8">
+      <a href="../../index.html" class="text-gray-700 hover:underline">← Volver al inicio</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-12">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span></p>
+  </footer>
+
+  <script>
+    // === Funciones base ===
+    Math.erf = Math.erf || function (x) {
+      const sign = x >= 0 ? 1 : -1;
+      x = Math.abs(x);
+      const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+      const t=1/(1+p*x);
+      const y=1-(((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x));
+      return sign*y;
+    };
+    function cdfZ(z){return 0.5*(1+Math.erf(z/Math.SQRT2));}
+    function invErf(x){const a=0.147;const ln=Math.log(1-x*x);const t1=2/(Math.PI*a)+ln/2;const t2=1/a*ln;return Math.sign(x)*Math.sqrt(Math.sqrt(t1*t1-t2)-t1);}
+
+    // === Gráfica con área sombreada ===
+    let chart;
+    function graficar(mu, sigma, x1, x2, tipo) {
+  const ctx = document.getElementById("graficaNormal");
+  const dataX = [], dataY = [], shadeY = [];
+
+  for (let x = mu - 4 * sigma; x <= mu + 4 * sigma; x += sigma / 50) {
+    const y = (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * ((x - mu) / sigma) ** 2);
+
+    // Redondeo a 4 decimales en los valores del eje X
+    const xRounded = parseFloat(x.toFixed(4));
+
+    dataX.push(xRounded);
+    dataY.push(y);
+
+    if (tipo === "menor" && x <= x1) shadeY.push(y);
+    else if (tipo === "mayor" && x >= x1) shadeY.push(y);
+    else if (tipo === "entre" && x >= x1 && x <= x2) shadeY.push(y);
+    else shadeY.push(null);
+  }
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: dataX,
+      datasets: [
+        { label: "Curva normal", data: dataY, borderColor: "#db2777", fill: false, pointRadius: 0 },
+        { label: "Área", data: shadeY, borderColor: "#a21caf", backgroundColor: "rgba(219,39,119,0.3)", fill: true, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          title: { display: true, text: "X" },
+          ticks: {
+            callback: function(value) {
+              // Chart.js manda el índice, por eso devolvemos el label con 4 decimales
+              const label = this.getLabelForValue(value);
+              return parseFloat(label).toFixed(2); // o .toFixed(4) si quieres aún más precisión
+            }
+          }
+        },
+        y: { display: false }
+      }
+    }
+  });
+}
+
+    // === Calculadora ===
+    function calcularNormal() {
+      const mu = parseFloat(document.getElementById("mu").value);
+      const sigma = parseFloat(document.getElementById("sigma").value);
+      const x1 = parseFloat(document.getElementById("x1").value);
+      const x2 = parseFloat(document.getElementById("x2").value);
+      const tipo = document.getElementById("tipo").value;
+      const out = document.getElementById("resultado");
+      if(isNaN(mu)||isNaN(sigma)||sigma<=0){alert("Valores inválidos");return;}
+      let res=0,Z1,Z2;
+      if(tipo==="menor"){Z1=(x1-mu)/sigma;res=cdfZ(Z1);}
+      else if(tipo==="mayor"){Z1=(x1-mu)/sigma;res=1-cdfZ(Z1);}
+      else if(tipo==="entre"){if(isNaN(x2)||x2<=x1){alert("b debe ser > a");return;}Z1=(x1-mu)/sigma;Z2=(x2-mu)/sigma;res=cdfZ(Z2)-cdfZ(Z1);}
+      else if(tipo==="inverso"){const p=parseFloat(prompt("Ingresa P(Z < z):"));if(isNaN(p)||p<=0||p>=1){alert("P inválida");return;}const Z=Math.SQRT2*invErf(2*p-1);const X=mu+Z*sigma;out.innerHTML=`Z=${Z.toFixed(3)}, X=${X.toFixed(3)}`;graficar(mu,sigma,mu-sigma,mu+sigma,tipo);return;}
+      out.innerHTML=`P = ${res.toFixed(4)}`; graficar(mu,sigma,x1,x2,tipo);
+    }
+
+    // === Tabla Z ===
+    function generarTablaZ(){
+      const cont=document.getElementById("tablaZ");
+      let html="<table class='border-collapse'><tr><th class='border px-2 bg-pink-100'>Z</th>";
+      for(let i=0;i<10;i++) html+=`<th class='border px-2 bg-pink-100'>.${i}</th>`; html+="</tr>";
+      for(let z=0.0;z<=3.0;z+=0.1){
+        html+=`<tr><td class='border px-2 bg-pink-50'>${z.toFixed(1)}</td>`;
+        for(let j=0;j<10;j++){const val=cdfZ(parseFloat((z+j/100).toFixed(2))).toFixed(4);html+=`<td class='border px-2 text-center'>${val}</td>`;}
+        html+="</tr>";
+      }
+      cont.innerHTML=html+"</table>";
+    }
+    generarTablaZ();
+
+    // === Ejercicios ===
+    const ejerciciosNormal={facil:[
+      {p:"μ=100, σ=10, ¿P(X < 110)?",o:["0.8413","0.8085","0.8925","0.7557"],c:0,e:"Z=1 → 0.8413"},
+      {p:"μ=50, σ=5, ¿P(X > 60)?",o:["0.0228","0.0354","0.0452","0.0668"],c:0,e:"Z=2 → 1−0.9772=0.0228"},
+      {p:"μ=70, σ=8, ¿P(62 < X < 78)?",o:["0.6826","0.7031","0.6480","0.7190"],c:0,e:"Z=±1 → 0.6826"}],
+    intermedio:[
+      {p:"μ=100, σ=15, ¿P(X < 85)?",o:["0.1587","0.1922","0.1349","0.1765"],c:0,e:"Z=−1 → 0.1587"},
+      {p:"μ=200, σ=20, ¿P(X > 230)?",o:["0.0668","0.0833","0.0520","0.0951"],c:0,e:"Z=1.5 → 0.0668"},
+      {p:"μ=0, σ=1, ¿P(−1 < X < 1)?",o:["0.6826","0.7010","0.6554","0.7201"],c:0,e:"Z=±1 → 0.6826"}],
+    dificil:[
+      {p:"μ=500, σ=100, ¿P(X > 650)?",o:["0.0668","0.0571","0.0808","0.0520"],c:0,e:"Z=1.5 → 0.0668"},
+      {p:"μ=80, σ=6, ¿P(X < 70)?",o:["0.0475","0.0564","0.0401","0.0613"],c:0,e:"Z=−1.67 → 0.0475"},
+      {p:"μ=10, σ=2, ¿P(8 < X < 14)?",o:["0.8186","0.8352","0.7901","0.8620"],c:0,e:"Z1=−1, Z2=2 → 0.8186"}]};
+    let n_idx=0,n_score=0,n_list=[];
+    function cargarEjNormal(l){n_list=ejerciciosNormal[l].slice();n_idx=0;n_score=0;document.getElementById("zonaNormal").classList.remove("hidden");mostrarNormal();}
+    function mostrarNormal(){const e=n_list[n_idx];
+      document.getElementById("zonaNormal").innerHTML=`
+      <div class='mb-3 font-semibold text-pink-700'>Ejercicio ${n_idx+1} de ${n_list.length}</div>
+      <div class='mb-3'>${e.p}</div>
+      ${e.o.map((op,i)=>`<label class='block border rounded px-3 py-2 hover:bg-pink-100'><input type='radio' name='nop' value='${i}' class='mr-2'>${op}</label>`).join("")}
+      <div class='text-center mt-3'><button onclick='comprobarNormal()' class='bg-pink-600 text-white px-4 py-2 rounded'>Comprobar</button></div>
+      <div id='n_retro' class='mt-3 text-center font-semibold'></div>
+      <div class='text-center mt-3'><button id='n_sig' onclick='sigNormal()' class='hidden bg-gray-700 text-white px-3 py-1 rounded'>Siguiente</button></div>`;}
+    function comprobarNormal(){const sel=document.querySelector("input[name='nop']:checked");if(!sel){alert("Selecciona una opción");return;}
+      const e=n_list[n_idx];const idx=parseInt(sel.value,10);const retro=document.getElementById("n_retro");
+      if(idx===e.c){n_score++;retro.innerHTML="✅ Correcto. "+e.e;retro.className="text-green-700 font-semibold";}
+      else{retro.innerHTML="❌ Incorrecto. "+e.e;retro.className="text-red-700 font-semibold";}
+      document.getElementById("n_sig").classList.remove("hidden");}
+    function sigNormal(){n_idx++;if(n_idx<n_list.length)mostrarNormal();else document.getElementById("zonaNormal").innerHTML="<h3 class='text-center font-bold text-pink-700'>¡Terminado!</h3><p class='text-center mt-2'>Puntaje: "+n_score+"/"+n_list.length+"</p>";}
+  </script>
+</body>
+</html>

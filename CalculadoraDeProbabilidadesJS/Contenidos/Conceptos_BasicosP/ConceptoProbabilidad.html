@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concepto de Probabilidad</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gradient-to-br from-sky-50 to-white text-gray-800">
+
+  <header class="bg-sky-700 text-white py-6 text-center shadow-md">
+    <h1 class="text-3xl font-bold">Concepto de Probabilidad</h1>
+    <p class="text-sky-200">Casos favorables y posibles</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+    <section class="text-center mb-6">
+      <p class="text-gray-700 mb-4">
+        La probabilidad mide la posibilidad de que ocurra un evento.  
+        Se calcula como la razón entre el número de <strong>casos favorables</strong> y el número total de <strong>casos posibles</strong>.
+      </p>
+      <img src="../../Recursos/R_ConceptosBasicosP/probabilidad-clasica-o-probabilidad-teorica.png" alt="Fórmula" class="mx-auto h-44 mb-3">
+      <p class="text-sm text-gray-600">
+        <strong>Fórmula:</strong> P(E) = Casos favorables / Casos posibles
+      </p>
+    </section>
+
+    <form id="formProbabilidad" class="bg-white rounded-2xl shadow p-6 border max-w-md mx-auto mb-8">
+      <label class="block mb-2">Casos favorables:</label>
+      <input type="number" id="favorables" class="w-full border rounded px-3 py-2 mb-4" min="0">
+
+      <label class="block mb-2">Casos posibles:</label>
+      <input type="number" id="posibles" class="w-full border rounded px-3 py-2 mb-4" min="1">
+
+      <button type="button" onclick="calcularProbabilidad()" class="bg-sky-700 text-white px-5 py-2 rounded hover:bg-sky-800 transition">Calcular</button>
+
+      <div id="resultado" class="mt-4 text-center font-semibold text-sky-700 text-lg"></div>
+      <p id="interpretacion" class="text-center text-gray-600 mt-2"></p>
+    </form>
+
+    <div class="bg-white p-6 rounded-2xl shadow border text-center">
+      <h3 class="text-lg font-semibold text-sky-700 mb-4">Gráfica de probabilidad</h3>
+      <canvas id="graficoProbabilidad" height="100"></canvas>
+    </div>
+
+    <div class="text-center mt-8">
+      <a href="ConceptosBasicMain.html" class="text-sky-700 hover:underline">← Volver al tema principal</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-10">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span></p>
+  </footer>
+
+  <script>
+    let grafico = null;
+
+    function calcularProbabilidad() {
+      const f = parseFloat(document.getElementById("favorables").value);
+      const p = parseFloat(document.getElementById("posibles").value);
+
+      if (isNaN(f) || isNaN(p) || p <= 0 || f < 0 || f > p) {
+        alert("Verifica los valores ingresados.");
+        return;
+      }
+
+      const prob = f / p;
+      const resultado = (prob * 100).toFixed(2);
+
+      document.getElementById("resultado").innerHTML = `P(E) = ${prob.toFixed(4)} (${resultado}%)`;
+      document.getElementById("interpretacion").innerText = `Existe una probabilidad del ${resultado}% de que ocurra el evento.`;
+
+      if (grafico) grafico.destroy();
+
+      const ctx = document.getElementById("graficoProbabilidad").getContext("2d");
+      grafico = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Probabilidad de éxito", "Otros resultados"],
+          datasets: [{
+            data: [prob, 1 - prob],
+            backgroundColor: ["rgba(56, 189, 248, 0.6)", "rgba(203, 213, 225, 0.4)"]
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+  </script>
+
+</body>
+</html>

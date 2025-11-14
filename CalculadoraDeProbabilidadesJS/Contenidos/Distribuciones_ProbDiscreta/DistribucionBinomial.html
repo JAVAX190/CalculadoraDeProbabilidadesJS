@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Distribución Binomial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-green-50 text-gray-800">
+  <header class="bg-green-700 text-white py-6 text-center shadow">
+    <h1 class="text-2xl font-bold">Distribución Binomial</h1>
+    <p class="text-green-100">Características, cálculo y ejercicios</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+    <!-- Teoría -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-green-700 mb-2">Características y condiciones de aplicación</h2>
+      <ul class="list-disc ml-6 text-sm text-gray-700">
+        <li>Ensayos independientes (n fijado).</li>
+        <li>Cada ensayo tiene dos resultados: éxito o fracaso.</li>
+        <li>Probabilidad de éxito p constante en cada ensayo.</li>
+      </ul>
+      <p class="mt-3 text-sm">
+        Fórmula: <strong>P(X = k) = C(n, k) · p^k · (1−p)^(n−k)</strong> donde C(n,k) = n!/(k!(n−k)!).
+      </p>
+      <img src="../../Recursos/R_ProbDiscreta/Distribución-binomial-formula.png" alt="Fórmula binomial" class="mt-3 h-28 object-contain mx-auto">
+    </section>
+
+    <!-- Calculadora -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-green-700 mb-3">Calculadora Binomial</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div>
+          <label class="text-sm">n (ensayos)</label>
+          <input id="bin_n" type="number" min="0" class="w-full border rounded px-2 py-1">
+        </div>
+        <div>
+          <label class="text-sm">p (éxito)</label>
+          <input id="bin_p" type="number" step="any" min="0" max="1" class="w-full border rounded px-2 py-1" placeholder="ej. 0.25">
+        </div>
+        <div>
+          <label class="text-sm">k (valor)</label>
+          <input id="bin_k" type="number" min="0" class="w-full border rounded px-2 py-1">
+        </div>
+        <div>
+          <label class="text-sm">Tipo</label>
+          <select id="bin_tipo" class="w-full border rounded px-2 py-1">
+            <option value="exactamente">Exactamente k</option>
+            <option value="almenos">Al menos k (≥ k)</option>
+            <option value="almaximo">A lo sumo k (≤ k)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-4 text-center">
+        <button id="btnCalcularBin" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Calcular</button>
+      </div>
+
+      <div id="bin_result" class="mt-4 text-center font-semibold"></div>
+    </section>
+
+    <!-- Ejercicios (quiz) -->
+    <section class="bg-white rounded-2xl p-5 shadow border">
+      <h2 class="text-lg font-semibold text-green-700 mb-3">Ejercicios - Binomial</h2>
+
+      <div class="flex gap-3 mb-4">
+        <button onclick="cargarEjBin('facil')" class="bg-green-600 text-white px-4 py-2 rounded">Fácil</button>
+        <button onclick="cargarEjBin('intermedio')" class="bg-yellow-500 text-white px-4 py-2 rounded">Intermedio</button>
+        <button onclick="cargarEjBin('dificil')" class="bg-red-600 text-white px-4 py-2 rounded">Difícil</button>
+      </div>
+
+      <div id="zonaBin" class="hidden bg-green-50 rounded p-4 border">
+        <div id="bin_contador" class="font-semibold text-sm text-green-700 mb-2"></div>
+        <div id="bin_pregunta" class="mb-3"></div>
+        <div id="bin_opciones" class="space-y-2 mb-3"></div>
+        <div class="text-center">
+          <button id="btnComprobarBin" class="bg-green-700 text-white px-4 py-2 rounded">Comprobar</button>
+        </div>
+        <div id="bin_retro" class="mt-3 text-center font-semibold"></div>
+        <div class="text-center mt-3">
+          <button id="bin_siguiente" class="hidden bg-gray-700 text-white px-3 py-1 rounded">Siguiente</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="text-center mt-8">
+      <a href="DistribucionProbDisMain.html" class="text-gray-700 hover:underline">← Volver al menú de distribuciones</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-12">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">[Tu nombre]</span></p>
+  </footer>
+
+  <script>
+  /*************************************************************************
+   * UTIL: combinatorio (evita overflow en factoriales enormes)
+   *************************************************************************/
+  function comb(n,k){
+    if(k<0||k>n) return 0;
+    k = Math.min(k, n-k);
+    let num = 1;
+    let den = 1;
+    for(let i=1;i<=k;i++){
+      num *= (n - (k - i));
+      den *= i;
+    }
+    return Math.round(num/den);
+  }
+
+  function binomPMF(n,k,p){
+    if(k<0||k>n) return 0;
+    const c = comb(n,k);
+    return c * Math.pow(p,k) * Math.pow(1-p, n-k);
+  }
+
+  function formatProb4(x){
+    if(x === 0) return "0.0000";
+    if(!isFinite(x)) return String(x);
+    if(Math.abs(x) < 1e-6) return x.toExponential(3); // scientific when extremely small
+    return parseFloat(x).toFixed(4);
+  }
+
+  /*************************************************************************
+   * NORMALIZADOR y MEZCLADOR DE OPCIONES (aplicar a cada conjunto de ejercicios)
+   *
+   * - normalizarOpciones(ejerciciosArray): convierte opciones a 4 decimales
+   * - shuffleOptions(ejerciciosArray): mezcla las opciones y actualiza e.c
+   *************************************************************************/
+  function normalizarOpciones(ejArray){
+    ejArray.forEach(e => {
+      e.o = e.o.map(op => {
+        // convertir coma a punto y parsear
+        const n = parseFloat(String(op).replace(",", "."));
+        if (isNaN(n)) return String(op); // si no es número, dejar como está
+        return parseFloat(n).toFixed(4);
+      });
+    });
+  }
+
+  function shuffleArray(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+  }
+
+  function shuffleOptions(ejArray){
+    ejArray.forEach(e => {
+      // crear pares [texto, originalIndex]
+      const pairs = e.o.map((opt, idx) => ({opt: String(opt), idx: idx}));
+      shuffleArray(pairs);
+      // encontrar la nueva posicion de la respuesta correcta original (e.c)
+      const originalCorrectIndex = e.c;
+      const newIndex = pairs.findIndex(p => p.idx === originalCorrectIndex);
+      // reescribir opciones y nueva c
+      e.o = pairs.map(p => p.opt);
+      e.c = newIndex >= 0 ? newIndex : 0;
+    });
+  }
+
+  /*************************************************************************
+   * EJERCICIOS (definidos con valores legibles; normalizador los pondrá a 4 decimales
+   *************************************************************************/
+  const ejerciciosBin = {
+    facil:[
+      {q:"n=5, p=0.4: ¿P(X=2)?", o:["0.3456","0.2592","0.2304","0.345"], c:0, e:"C(5,2)·0.4^2·0.6^3 = 0.3456"},
+      {q:"n=4, p=0.5: ¿P(X ≤ 1)?", o:["0.3125","0.25","0.375","0.5"], c:0, e:"P(0)+P(1)=0.3125"},
+      {q:"n=3, p=0.2: ¿P(X ≥ 1)?", o:["0.488","0.512","0.2","0.8"], c:0, e:"1−P(0)=0.488"},
+      {q:"n=6, p=0.5: ¿P(X=3)?", o:["0.3125","0.312","0.25","0.375"], c:0, e:"C(6,3)·0.5^6=0.3125"},
+      {q:"n=10, p=0.1: ¿P(X=0)?", o:["0.3486784401","0.9","0.1","0.6513215599"], c:0, e:"0.9^10≈0.3487"},
+      {q:"n=8, p=0.3: ¿P(X ≤ 2)?", o:["0.8096","0.6","0.4","0.2"], c:0, e:"Suma P(0)+P(1)+P(2) ≈ 0.8096"},
+      {q:"n=5, p=0.7: ¿P(X=5)?", o:["0.16807","0.7","0.49","0.3"], c:0, e:"0.7^5=0.16807"},
+      {q:"n=2, p=0.5: ¿P(X ≥ 1)?", o:["0.75","0.5","0.25","1"], c:0, e:"1−P(0)=0.75"},
+      {q:"n=4, p=0.25: ¿P(X=1)?", o:["0.421875","0.234375","0.125","0.3125"], c:0, e:"C(4,1)·0.25·0.75^3≈0.4219"},
+      {q:"n=3, p=0.6: ¿P(X ≤ 2)?", o:["0.896","0.8","0.6","0.4"], c:0, e:"P(0)+P(1)+P(2)=0.896"}
+    ],
+    intermedio:[
+      {q:"n=12, p=0.3: ¿P(X=4)?", o:["0.1246","0.2","0.1","0.3"], c:0, e:"C(12,4)·0.3^4·0.7^8≈0.1246"},
+      {q:"n=20, p=0.1: ¿P(X ≤ 2)?", o:["0.6778","0.5","0.3","0.9"], c:0, e:"Suma P(0..2)≈0.6778"},
+      {q:"n=15, p=0.5: ¿P(X ≥ 10)?", o:["0.0207","0.1","0.05","0.2"], c:0, e:"Suma P(10..15)≈0.0207"},
+      {q:"n=10, p=0.2: ¿P(X=3)?", o:["0.2013","0.18","0.25","0.15"], c:0, e:"C(10,3)·0.2^3·0.8^7≈0.2013"},
+      {q:"n=6, p=0.4: ¿P(X ≤ 3)?", o:["0.904","0.8","0.7","0.6"], c:0, e:"Suma P(0..3)≈0.904"},
+      {q:"n=9, p=0.7: ¿P(X ≥ 7)?", o:["0.4536","0.5","0.3","0.1"], c:0, e:"P(7)+P(8)+P(9)≈0.4536"}
+    ],
+    dificil:[
+      {q:"n=30, p=0.1: ¿P(X=3)?", o:["0.1901","0.1","0.2","0.05"], c:0, e:"C(30,3)·0.1^3·0.9^27≈0.1901"},
+      {q:"n=25, p=0.4: ¿P(X ≤ 8)?", o:["0.264","0.3","0.5","0.7"], c:0, e:"Suma P(0..8)≈0.264"},
+      {q:"n=50, p=0.02: ¿P(X=1)?", o:["0.364","0.2","0.1","0.05"], c:0, e:"C(50,1)*0.02*0.98^49≈0.364"},
+      {q:"n=40, p=0.6: ¿P(X ≥ 30)?", o:["0.0004","0.01","0.1","0.2"], c:0, e:"Suma P(30..40) muy pequeña≈0.0004"}
+    ]
+  };
+
+  // Aplicar normalizador y mezclar opciones (para evitar patrón visible)
+  normalizarOpciones(ejerciciosBin.facil);
+  normalizarOpciones(ejerciciosBin.intermedio);
+  normalizarOpciones(ejerciciosBin.dificil);
+
+  shuffleOptions(ejerciciosBin.facil);
+  shuffleOptions(ejerciciosBin.intermedio);
+  shuffleOptions(ejerciciosBin.dificil);
+
+  /*************************************************************************
+   * LÓGICA UI: calculadora y quiz
+   *************************************************************************/
+  document.getElementById("btnCalcularBin").addEventListener("click", function(){
+    const n = parseInt(document.getElementById("bin_n").value,10);
+    const p = parseFloat(document.getElementById("bin_p").value);
+    const k = parseInt(document.getElementById("bin_k").value,10);
+    const tipo = document.getElementById("bin_tipo").value;
+    const out = document.getElementById("bin_result");
+    if(isNaN(n)||isNaN(p)||isNaN(k) || p<0 || p>1 || n<0){
+      alert("Ingresa valores válidos para n, p y k.");
+      return;
+    }
+    let res = 0;
+    if(tipo==="exactamente"){
+      res = binomPMF(n,k,p);
+    } else if(tipo==="almenos"){
+      for(let i=k;i<=n;i++) res += binomPMF(n,i,p);
+    } else {
+      for(let i=0;i<=k;i++) res += binomPMF(n,i,p);
+    }
+    out.innerHTML = "P = " + formatProb4(res);
+  });
+
+  // --- Quiz Binomial: UI functions
+  let bin_idx=0, bin_score=0, bin_list=[];
+
+  function cargarEjBin(level){
+    bin_list = ejerciciosBin[level].slice();
+    bin_idx = 0;
+    bin_score = 0;
+    document.getElementById("zonaBin").classList.remove("hidden");
+    mostrarBin();
+  }
+
+  function mostrarBin(){
+    const e = bin_list[bin_idx];
+    document.getElementById("bin_contador").textContent = `Ejercicio ${bin_idx+1} de ${bin_list.length}`;
+    document.getElementById("bin_pregunta").textContent = e.q;
+    // generar opciones
+    document.getElementById("bin_opciones").innerHTML = e.o.map((op,i) =>
+      "<label class='block border rounded px-3 py-2 hover:bg-green-100'><input type='radio' name='binop' value='"+i+"' class='mr-2'>"+op+"</label>"
+    ).join("");
+    document.getElementById("bin_retro").textContent = "";
+    document.getElementById("bin_siguiente").classList.add("hidden");
+    // asignar listeners del botón comprobar
+    document.getElementById("btnComprobarBin").onclick = comprobarBin;
+    document.getElementById("bin_siguiente").onclick = sigBin;
+  }
+
+  function comprobarBin(){
+    const sel = document.querySelector("input[name='binop']:checked");
+    if(!sel){ alert("Selecciona una opción"); return; }
+    const e = bin_list[bin_idx];
+    const idx = parseInt(sel.value,10);
+    const retro = document.getElementById("bin_retro");
+    if(idx === e.c){
+      bin_score++;
+      retro.innerHTML = "✅ Correcto. " + e.e;
+      retro.className = "text-green-700 font-semibold";
+    } else {
+      retro.innerHTML = "❌ Incorrecto. " + e.e;
+      retro.className = "text-red-700 font-semibold";
+    }
+    document.getElementById("bin_siguiente").classList.remove("hidden");
+  }
+
+  function sigBin(){
+    bin_idx++;
+    if(bin_idx < bin_list.length) mostrarBin();
+    else {
+      document.getElementById("zonaBin").innerHTML = "<h3 class='text-center font-bold text-green-700'>¡Terminado!</h3><p class='text-center mt-2'>Puntaje: "+bin_score+"/"+bin_list.length+"</p>";
+    }
+  }
+
+  </script>
+</body>
+</html>

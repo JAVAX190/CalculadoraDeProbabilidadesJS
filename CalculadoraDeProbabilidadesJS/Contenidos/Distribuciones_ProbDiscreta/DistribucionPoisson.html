@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Distribución de Poisson</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-sky-50 text-gray-800">
+  <header class="bg-sky-700 text-white py-6 text-center shadow">
+    <h1 class="text-2xl font-bold">Distribución de Poisson</h1>
+    <p class="text-sky-100">Conteos por tiempo/espacio, fórmula y aplicaciones</p>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-6">
+    <!-- Teoría -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-sky-700 mb-2">Concepto y Aplicaciones</h2>
+      <p class="text-sm text-gray-700">
+        La distribución de Poisson modela el número de eventos que ocurren en un intervalo fijo de tiempo o espacio
+        cuando los eventos ocurren con tasa promedio λ y son independientes.
+      </p>
+      <p class="mt-3 text-sm">
+        Fórmula: <strong>P(X = k) = (e^{−λ} λ^k) / k! </strong> para k = 0,1,2,...
+      </p>
+      <img src="../../Recursos/R_ProbDiscreta/distribucio__n_poisson_1.png" alt="Fórmula Poisson" class="mt-3 h-28 object-contain mx-auto">
+    </section>
+
+    <!-- Calculadora -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-sky-700 mb-3">Calculadora Poisson</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div>
+          <label class="text-sm">λ (tasa)</label>
+          <input id="poi_lambda" type="number" step="any" min="0" class="w-full border rounded px-2 py-1" placeholder="ej. 2.5">
+        </div>
+        <div>
+          <label class="text-sm">k (valor)</label>
+          <input id="poi_k" type="number" min="0" class="w-full border rounded px-2 py-1" placeholder="ej. 3">
+        </div>
+        <div>
+          <label class="text-sm">Tipo</label>
+          <select id="poi_tipo" class="w-full border rounded px-2 py-1">
+            <option value="igual">P(X = k)</option>
+            <option value="almaximo">P(X ≤ k)</option>
+            <option value="almenos">P(X ≥ k)</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm">Mostrar barras hasta</label>
+          <input id="poi_maxk" type="number" min="5" class="w-full border rounded px-2 py-1" placeholder="ej. 12">
+        </div>
+      </div>
+
+      <div class="mt-4 text-center">
+        <button id="btnCalcularPoi" class="bg-sky-600 text-white px-4 py-2 rounded hover:bg-sky-700">Calcular</button>
+      </div>
+
+      <div id="poi_result" class="mt-4 text-center font-semibold"></div>
+
+      <canvas id="chartPoi" class="mt-6"></canvas>
+    </section>
+
+    <!-- Ejercicios -->
+    <section class="bg-white rounded-2xl p-5 shadow border">
+      <h2 class="text-lg font-semibold text-sky-700 mb-3">Ejercicios - Poisson</h2>
+
+      <div class="flex gap-3 mb-4">
+        <button onclick="cargarEjPoi('facil')" class="bg-green-600 text-white px-4 py-2 rounded">Fácil</button>
+        <button onclick="cargarEjPoi('intermedio')" class="bg-yellow-500 text-white px-4 py-2 rounded">Intermedio</button>
+        <button onclick="cargarEjPoi('dificil')" class="bg-red-600 text-white px-4 py-2 rounded">Difícil</button>
+      </div>
+
+      <div id="zonaPoi" class="hidden bg-sky-50 rounded p-4 border"></div>
+    </section>
+
+    <div class="text-center mt-8">
+      <a href="DistribucionProbDisMain.html" class="text-gray-700 hover:underline">← Volver al menú de distribuciones</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-12">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">[Tu nombre]</span></p>
+  </footer>
+
+<script>
+/* ===================== UTILIDADES NUMÉRICAS ===================== */
+// factorial seguro (iterativo, con tope para evitar overflow)
+function factorial(n){
+  if(n < 0) return NaN;
+  if(n === 0 || n === 1) return 1;
+  let res = 1;
+  for(let i=2;i<=n;i++){
+    res *= i;
+    // si res ya es Infinity (por número muy grande), salimos
+    if(!isFinite(res)) return Infinity;
+  }
+  return res;
+}
+
+// PMF de Poisson
+function poissonPMF(lambda, k){
+  if(k < 0) return 0;
+  // usar exp + pow / factorial
+  return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+}
+
+// formato uniforme 4 decimales (o notación científica si muy pequeño)
+function formatProb4(x){
+  if(x === 0) return "0.0000";
+  if(!isFinite(x)) return String(x);
+  if(Math.abs(x) < 1e-6) return x.toExponential(3);
+  return parseFloat(x).toFixed(4);
+}
+
+/* ===================== NORMALIZADOR & MEZCLADOR ===================== */
+function normalizarOpciones(ejArray){
+  ejArray.forEach(e => {
+    e.o = e.o.map(op => {
+      const n = parseFloat(String(op).replace(",", "."));
+      if(isNaN(n)) return String(op);
+      return parseFloat(n).toFixed(4);
+    });
+  });
+}
+
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+}
+
+function shuffleOptions(ejArray){
+  ejArray.forEach(e => {
+    const pairs = e.o.map((opt, idx) => ({opt: String(opt), idx: idx}));
+    shuffleArray(pairs);
+    const originalCorrectIndex = e.c;
+    const newIndex = pairs.findIndex(p => p.idx === originalCorrectIndex);
+    e.o = pairs.map(p => p.opt);
+    e.c = newIndex >= 0 ? newIndex : 0;
+  });
+}
+
+/* ===================== EJERCICIOS POISSON ===================== */
+/* Opciones ya razonadas; el normalizador las dejará en 4 decimales */
+const ejerciciosPoi = {
+  facil: [
+    {q:"λ=2.5: ¿P(X=3)?", o:["0.2138","0.2570","0.1800","0.1500"], c:0, e:"e^{-2.5}·2.5^3/3! ≈ 0.2138"},
+    {q:"λ=1.2: ¿P(X ≤ 1)?", o:["0.6977","0.3200","0.1500","0.5000"], c:0, e:"P(0)+P(1) ≈ 0.6977"},
+    {q:"λ=4: ¿P(X ≥ 5)?", o:["0.3710","0.2424","0.1000","0.5000"], c:0, e:"1−P(X≤4) ≈ 0.3710"},
+    {q:"λ=0.8: ¿P(X=0)?", o:["0.4493","0.8000","0.2000","0.1000"], c:0, e:"e^{-0.8} ≈ 0.4493"},
+    {q:"λ=3: ¿P(X ≤ 2)?", o:["0.4232","0.3000","0.5000","0.2000"], c:0, e:"P(0)+P(1)+P(2) ≈ 0.4232"},
+    {q:"λ=6: ¿P(X=6)?", o:["0.1606","0.2000","0.1000","0.0500"], c:0, e:"e^{-6}·6^6/6! ≈ 0.1606"},
+    {q:"λ=1: ¿P(X ≥ 2)?", o:["0.3233","0.2700","0.2000","0.4000"], c:0, e:"1−P(0)−P(1)=0.3233"},
+    {q:"λ=5: ¿P(X=4)?", o:["0.1755","0.2000","0.1000","0.0500"], c:0, e:"e^{-5}·5^4/4! ≈ 0.1755"},
+    {q:"λ=2: ¿P(X ≤ 3)?", o:["0.8571","0.7000","0.4000","0.2500"], c:0, e:"P(0)+P(1)+P(2)+P(3)≈0.8571"},
+    {q:"λ=0.5: ¿P(X=1)?", o:["0.3033","0.2000","0.1000","0.4000"], c:0, e:"e^{-0.5}·0.5 ≈ 0.3033"}
+  ],
+  intermedio: [
+    {q:"λ=3.5: ¿P(X=2)?", o:["0.1804","0.1500","0.3000","0.1000"], c:0, e:"e^{-3.5}·3.5^2/2! ≈ 0.1804"},
+    {q:"λ=7: ¿P(X ≤ 5)?", o:["0.2370","0.3000","0.1500","0.5000"], c:0, e:"Suma P(0..5) ≈ 0.2370"},
+    {q:"λ=2.2: ¿P(X ≥ 4)?", o:["0.1853","0.1000","0.3000","0.4000"], c:0, e:"1−P(0..3) ≈ 0.1853"},
+    {q:"λ=9: ¿P(X=9)?", o:["0.1251","0.2000","0.1000","0.0500"], c:0, e:"e^{-9}·9^9/9! ≈ 0.1251"},
+    {q:"λ=0.3: ¿P(X ≤ 1)?", o:["0.7408","0.3000","0.1000","0.5000"], c:0, e:"P(0)+P(1)≈0.7408"},
+    {q:"λ=4.5: ¿P(X=5)?", o:["0.1706","0.2000","0.1000","0.0500"], c:0, e:"e^{-4.5}·4.5^5/5! ≈ 0.1706"}
+  ],
+  dificil: [
+    {q:"λ=12: ¿P(X=8)?", o:["0.0996","0.0500","0.2000","0.3000"], c:0, e:"e^{-12}·12^8/8! ≈ 0.0996"},
+    {q:"λ=15: ¿P(X ≤ 10)?", o:["0.1186","0.2000","0.1000","0.0500"], c:0, e:"Suma P(0..10) ≈ 0.1186"},
+    {q:"λ=20: ¿P(X ≥ 25)?", o:["0.1673","0.1000","0.05","0.3"], c:0, e:"1−P(0..24) ≈ 0.1673"},
+    {q:"λ=0.7: ¿P(X=3)?", o:["0.0129","0.0200","0.0100","0.0050"], c:0, e:"e^{-0.7}·0.7^3/3! ≈ 0.0129"}
+  ]
+};
+
+// aplicar normalizador y mezclar opciones
+normalizarOpciones(ejerciciosPoi.facil);
+normalizarOpciones(ejerciciosPoi.intermedio);
+normalizarOpciones(ejerciciosPoi.dificil);
+
+shuffleOptions(ejerciciosPoi.facil);
+shuffleOptions(ejerciciosPoi.intermedio);
+shuffleOptions(ejerciciosPoi.dificil);
+
+/* ===================== GRAFICO (Chart.js barras) ===================== */
+let poiChart;
+function dibujarPoisson(lambda, maxk, highlightRange){
+  const ctx = document.getElementById('chartPoi');
+  const labels = [];
+  const data = [];
+  for(let k=0;k<=maxk;k++){
+    labels.push(String(k));
+    data.push(poissonPMF(lambda,k));
+  }
+
+  const backgroundColors = data.map((v, idx) => {
+    if(!highlightRange) return 'rgba(14,165,233,0.6)';
+    const [low, high] = highlightRange;
+    return (idx >= low && idx <= high) ? 'rgba(14,165,233,0.9)' : 'rgba(14,165,233,0.4)';
+  });
+
+  if(poiChart) poiChart.destroy();
+  poiChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ label: 'P(X=k)', data: data.map(v=>parseFloat(v.toFixed(6))), backgroundColor: backgroundColors }] },
+    options: { 
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { ticks: { callback: function(val){ return parseFloat(val).toFixed(4); } } } }
+    }
+  });
+}
+
+/* ===================== CALCULADORA UI ===================== */
+document.getElementById('btnCalcularPoi').addEventListener('click', function(){
+  const lambda = parseFloat(document.getElementById('poi_lambda').value);
+  const k = parseInt(document.getElementById('poi_k').value,10);
+  const tipo = document.getElementById('poi_tipo').value;
+  const maxkInput = parseInt(document.getElementById('poi_maxk').value,10) || Math.max(10, (k||0)+6);
+  const out = document.getElementById('poi_result');
+
+  if(isNaN(lambda) || lambda < 0 || isNaN(k) || k < 0){
+    alert('Ingresa valores válidos para λ y k.');
+    return;
+  }
+
+  let res = 0;
+  if(tipo === 'igual'){
+    res = poissonPMF(lambda,k);
+    dibujarPoisson(lambda, maxkInput, [k,k]);
+  } else if(tipo === 'almaximo'){
+    for(let i=0;i<=k;i++) res += poissonPMF(lambda, i);
+    dibujarPoisson(lambda, maxkInput, [0,k]);
+  } else { // almenos
+    // sumatoria desde k hasta un tope razonable
+    for(let i=k;i<=maxkInput;i++){
+      res += poissonPMF(lambda, i);
+    }
+    // si calculamos parcial, mejor mostrar desde k..maxk highlight
+    dibujarPoisson(lambda, maxkInput, [k, maxkInput]);
+  }
+
+  out.innerHTML = 'P = ' + formatProb4(res);
+});
+
+/* ===================== EJERCICIOS UI ===================== */
+let poi_idx = 0, poi_score = 0, poi_list = [];
+
+function cargarEjPoi(level){
+  poi_list = ejerciciosPoi[level].slice();
+  poi_idx = 0; poi_score = 0;
+  document.getElementById('zonaPoi').classList.remove('hidden');
+  mostrarPoi();
+}
+
+function mostrarPoi(){
+  const e = poi_list[poi_idx];
+  document.getElementById('zonaPoi').innerHTML = `
+    <div class='mb-3 font-semibold text-sky-700'>Ejercicio ${poi_idx+1} de ${poi_list.length}</div>
+    <div class='mb-3'>${e.q}</div>
+    ${e.o.map((op,i)=>`<label class='block border rounded px-3 py-2 hover:bg-sky-100'><input type='radio' name='poiop' value='${i}' class='mr-2'>${op}</label>`).join('')}
+    <div class='text-center mt-3'><button id='btnComprobarPoi' class='bg-sky-600 text-white px-4 py-2 rounded'>Comprobar</button></div>
+    <div id='poi_retro' class='mt-3 text-center font-semibold'></div>
+    <div class='text-center mt-3'><button id='poi_sig' class='hidden bg-gray-700 text-white px-3 py-1 rounded'>Siguiente</button></div>
+  `;
+  document.getElementById('btnComprobarPoi').onclick = comprobarPoi;
+  document.getElementById('poi_sig').onclick = sigPoi;
+}
+
+function comprobarPoi(){
+  const sel = document.querySelector("input[name='poiop']:checked");
+  if(!sel){ alert('Selecciona una opción'); return; }
+  const e = poi_list[poi_idx];
+  const idx = parseInt(sel.value,10);
+  const retro = document.getElementById('poi_retro');
+  if(idx === e.c){
+    poi_score++;
+    retro.innerHTML = '✅ Correcto. ' + e.e;
+    retro.className = 'text-green-700 font-semibold';
+  } else {
+    retro.innerHTML = '❌ Incorrecto. ' + e.e;
+    retro.className = 'text-red-700 font-semibold';
+  }
+  document.getElementById('poi_sig').classList.remove('hidden');
+}
+
+function sigPoi(){
+  poi_idx++;
+  if(poi_idx < poi_list.length) mostrarPoi();
+  else {
+    document.getElementById('zonaPoi').innerHTML = "<h3 class='text-center font-bold text-sky-700'>¡Terminado!</h3><p class='text-center mt-2'>Puntaje: "+poi_score+"/"+poi_list.length+"</p>";
+  }
+}
+</script>
+</body>
+</html>

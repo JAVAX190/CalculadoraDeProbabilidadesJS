@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Distribuciones de Probabilidad</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Sección Hero -->
+  <section class="relative bg-indigo-700 text-white min-h-[80vh] flex items-center justify-center overflow-hidden">
+    <img src="Recursos/EstadisticaPrincipal.jpg" alt="Fondo estadístico" class="absolute inset-0 w-full h-full object-cover opacity-30">
+    <div class="relative z-10 text-center px-6">
+      <h1 class="text-4xl md:text-5xl font-bold mb-3">Calculadora de Distribuciones de Probabilidad</h1>
+      <p class="max-w-2xl mx-auto text-indigo-100 text-lg mb-6">
+        Este es un proyecto desarrollado en relación al curso de Estadística I, siendo una página web que funciona como una pequeña wiki y calculadora educativa sobre temas de probabilidades.
+      </p>
+      <a href="#temas" class="bg-white text-indigo-700 px-6 py-2 rounded-xl font-semibold hover:bg-indigo-100 transition">
+        Comenzar
+      </a>
+    </div>
+  </section>
+
+  <!-- Sección de temas -->
+  <main id="temas" class="max-w-6xl mx-auto py-10 px-4">
+    <h2 class="text-2xl font-semibold mb-6 text-center text-indigo-700">Temas del Proyecto</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- 1.Técnicas de Conteo -->
+      <div class="bg-white rounded-2xl shadow hover:shadow-lg p-5 border">
+        <img src="Recursos/Tecnicas-de-conteo-probabilidad.jpg" alt="Conteo" class="rounded-xl h-36 w-full object-cover mb-3">
+        <h3 class="text-lg font-bold text-indigo-700 mb-2">Técnicas de Conteo</h3>
+        <p class="text-sm text-gray-600">Permutaciones, combinaciones y sus aplicaciones.</p>
+        <a href="Contenidos/Tecnicas_de_conteo/TecnicasConteoMain.html" class="inline-block mt-3 text-indigo-600 font-medium hover:underline">Ir al tema →</a>
+      </div>
+
+      <!-- 2.Conceptos básicos de probabilidad -->
+      <div class="bg-white rounded-2xl shadow hover:shadow-lg p-5 border">
+        <img src="Recursos/ConceptosBasicosP.jpg" alt="Conteo" class="rounded-xl h-36 w-full object-cover mb-3">
+        <h3 class="text-lg font-bold text-indigo-700 mb-2">Conceptos básicos de probabilidad</h3>
+        <p class="text-sm text-gray-600">Concepto general, reglas y tipos de eventos.</p>
+        <a href="Contenidos/Conceptos_BasicosP/ConceptosBasicMain.html" class="inline-block mt-3 text-indigo-600 font-medium hover:underline">Ir al tema →</a>
+      </div>
+
+       <!-- 3.Probabilidad condicional y dependencias -->
+      <div class="bg-white rounded-2xl shadow hover:shadow-lg p-5 border">
+        <img src="Recursos/probabilidad-condicional.jpg" alt="Conteo" class="rounded-xl h-36 w-full object-cover mb-3">
+        <h3 class="text-lg font-bold text-indigo-700 mb-2">Probabilidad condicional y dependencias</h3>
+        <p class="text-sm text-gray-600">Probabilidad condicional, aplicaciones de tablas, diferencias de eventos.</p>
+        <a href="Contenidos/Probabilidad_Condicional&Dependencias/ProbabilidadConcidional.html" class="inline-block mt-3 text-indigo-600 font-medium hover:underline">Ir al tema →</a>
+      </div>
+
+       <!-- 4.Teorema de Bayes -->
+      <div class="bg-white rounded-2xl shadow hover:shadow-lg p-5 border">
+        <img src="Recursos/Teorema de Bayes.jpg" alt="Conteo" class="rounded-xl h-36 w-full object-cover mb-3">
+        <h3 class="text-lg font-bold text-indigo-700 mb-2">Teorema de Bayes</h3>
+        <p class="text-sm text-gray-600">Concepto e interpretación, identificación de probabilidades previas y Aplicaciones prácticas.</p>
+        <a href="Contenidos/TeoremaBayes/ConceptoBayes.html" class="inline-block mt-3 text-indigo-600 font-medium hover:underline">Ir al tema →</a>
+      </div>
+
+       <!-- 5.Distribuciones de probabilidad discretas -->
+      <div class="bg-white rounded-2xl shadow hover:shadow-lg p-5 border">
+        <img src="Recursos/Distribucion-discreta.jpg" alt="Conteo" class="rounded-xl h-36 w-full object-cover mb-3">
+        <h3 class="text-lg font-bold text-indigo-700 mb-2">Distribuciones de probabilidad discretas</h3>
+        <p class="text-sm text-gray-600">Distribución Binomial, Distribución Binomial Negativa y Distribución de Poisson.</p>
+        <a href="Contenidos/Distribuciones_ProbDiscreta/DistribucionProbDisMain.html" class="inline-block mt-3 text-indigo-600 font-medium hover:underline">Ir al tema →</a>
+      </div>
+
+       <!-- 6.Distribuciones continuas -->
+      <div class="bg-white rounded-2xl shadow hover:shadow-lg p-5 border">
+        <img src="Recursos/Distribuciones_continuas.jpg" alt="Conteo" class="rounded-xl h-36 w-full object-cover mb-3">
+        <h3 class="text-lg font-bold text-indigo-700 mb-2">Distribuciones continuas</h3>
+        <p class="text-sm text-gray-600">Distribución Exponencial y Distribución Normal.</p>
+        <a href="Contenidos/DistribucionesContinuas/DistribucionesContinuasMain.html" class="inline-block mt-3 text-indigo-600 font-medium hover:underline">Ir al tema →</a>
+      </div>
+
+    </div>
+
+    
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto</span></p>
+  </footer>
+    <!-- Info Botón -->
+  <a href="Acerca_de.html"
+    class="fixed bottom-5 right-5 bg-indigo-700 text-white rounded-full shadow-lg hover:bg-indigo-800 transition flex items-center justify-center w-14 h-14"
+    title="Acerca del proyecto">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M13 16h-1v-4h-1m1-4h.01M12 20.5A8.5 8.5 0 103.5 12 8.5 8.5 0 0012 20.5z" />
+    </svg>
+  </a>
+
+</body>
+</html>

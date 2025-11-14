@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regla del Producto</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-sky-50 to-white text-gray-800">
+  <!-- Encabezado -->
+  <header class="bg-sky-700 text-white py-6 text-center shadow-md">
+    <h1 class="text-3xl font-bold">Regla del Producto</h1>
+    <p class="text-sky-200">Probabilidad de que ocurran dos eventos simultáneamente</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+
+    <!-- Explicación general -->
+    <section class="text-center mb-6">
+      <p class="text-gray-700 mb-4">
+        La <strong>Regla del Producto</strong> permite calcular la probabilidad de que dos eventos ocurran al mismo tiempo.  
+        Puede aplicarse a <strong>eventos independientes</strong> o <strong>dependientes</strong>.
+      </p>
+      <img src="../../Recursos/R_ConceptosBasicosP/Regla_PRODUCTO.png" class="mx-auto h-44 mb-3" alt="Fórmula general">
+      <p class="text-sm text-gray-600">Selecciona el tipo de evento para usar la fórmula correspondiente.</p>
+    </section>
+
+    <!-- Selector de tipo -->
+    <div class="flex justify-center gap-4 mb-8">
+      <button id="btnIndependiente" class="px-5 py-2 rounded-lg bg-sky-700 text-white hover:bg-sky-800 transition" onclick="mostrarFormulario('independiente')">
+        Eventos Independientes
+      </button>
+      <button id="btnDependiente" class="px-5 py-2 rounded-lg bg-sky-500 text-white hover:bg-sky-600 transition" onclick="mostrarFormulario('dependiente')">
+        Eventos Dependientes
+      </button>
+    </div>
+
+    <!-- Sección de imagen de fórmula -->
+    <div id="imagenFormula" class="text-center mb-8 hidden">
+      <img id="imgFormulaTipo" src="../../Recursos/R_ConceptosBasicosP/ReglaProductoindependientes.png" alt="Fórmula específica" class="mx-auto h-48 rounded-xl shadow-lg border">
+      <p id="textoFormulaTipo" class="text-sm text-gray-600 mt-2"></p>
+    </div>
+
+    <!-- FORMULARIO: Independientes -->
+    <form id="formIndependiente" class="bg-white rounded-2xl shadow p-6 border max-w-md mx-auto mb-8 hidden">
+      <h3 class="text-center text-xl font-semibold text-sky-700 mb-4">Eventos Independientes</h3>
+      <p class="text-center text-gray-600 mb-3 text-sm">Fórmula: P(A ∩ B) = P(A) × P(B)</p>
+
+      <label>P(A):</label>
+      <input type="number" id="pa_ind" class="w-full border rounded px-3 py-2 mb-4" step="0.01" min="0" max="1">
+      <label>P(B):</label>
+      <input type="number" id="pb_ind" class="w-full border rounded px-3 py-2 mb-4" step="0.01" min="0" max="1">
+
+      <button type="button" onclick="calcular('independiente')" class="bg-sky-700 text-white px-5 py-2 rounded hover:bg-sky-800 transition">Calcular</button>
+
+      <div id="resultadoInd" class="mt-4 text-center font-semibold text-sky-700 text-lg"></div>
+      <p id="interpInd" class="text-center text-gray-600 mt-2"></p>
+    </form>
+
+    <!-- FORMULARIO: Dependientes -->
+    <form id="formDependiente" class="bg-white rounded-2xl shadow p-6 border max-w-md mx-auto mb-8 hidden">
+      <h3 class="text-center text-xl font-semibold text-sky-700 mb-4">Eventos Dependientes</h3>
+      <p class="text-center text-gray-600 mb-3 text-sm">Fórmula: P(A ∩ B) = P(A) × P(B|A)</p>
+
+      <label>P(A):</label>
+      <input type="number" id="pa_dep" class="w-full border rounded px-3 py-2 mb-4" step="0.01" min="0" max="1">
+      <label>P(B|A):</label>
+      <input type="number" id="pba_dep" class="w-full border rounded px-3 py-2 mb-4" step="0.01" min="0" max="1">
+
+      <button type="button" onclick="calcular('dependiente')" class="bg-sky-700 text-white px-5 py-2 rounded hover:bg-sky-800 transition">Calcular</button>
+
+      <div id="resultadoDep" class="mt-4 text-center font-semibold text-sky-700 text-lg"></div>
+      <p id="interpDep" class="text-center text-gray-600 mt-2"></p>
+    </form>
+
+    <!-- Gráfico -->
+    <div class="bg-white p-6 rounded-2xl shadow border text-center">
+      <h3 class="text-lg font-semibold text-sky-700 mb-4">Gráfica de Probabilidad Conjunta</h3>
+      <canvas id="graficoProducto" height="100"></canvas>
+    </div>
+
+    <!-- Botón volver -->
+    <div class="text-center mt-8">
+      <a href="ConceptosBasicMain.html" class="text-sky-700 hover:underline">← Volver al tema principal</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-10">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span></p>
+  </footer>
+
+  <script>
+    let tipoActivo = null;
+    let grafico = null;
+
+    function mostrarFormulario(tipo) {
+      // Ocultar formularios
+      document.getElementById("formIndependiente").classList.add("hidden");
+      document.getElementById("formDependiente").classList.add("hidden");
+
+      // Mostrar el que corresponde
+      if (tipo === "independiente") {
+        document.getElementById("formIndependiente").classList.remove("hidden");
+        tipoActivo = "independiente";
+
+        // Mostrar imagen de fórmula
+        document.getElementById("imagenFormula").classList.remove("hidden");
+        document.getElementById("imgFormulaTipo").src = "../../Recursos/R_ConceptosBasicosP/ReglaProductoindependientes.png";
+        document.getElementById("textoFormulaTipo").innerText = "Fórmula para eventos independientes: P(A ∩ B) = P(A) × P(B)";
+      } else {
+        document.getElementById("formDependiente").classList.remove("hidden");
+        tipoActivo = "dependiente";
+
+        document.getElementById("imagenFormula").classList.remove("hidden");
+        document.getElementById("imgFormulaTipo").src = "../../Recursos/R_ConceptosBasicosP/ReglaProductodependientes.png";
+        document.getElementById("textoFormulaTipo").innerText = "Fórmula para eventos dependientes: P(A ∩ B) = P(A) × P(B|A)";
+      }
+    }
+
+    function calcular(tipo) {
+      if (grafico) grafico.destroy();
+      const ctx = document.getElementById("graficoProducto").getContext("2d");
+      let pa, pb, resultado;
+
+      if (tipo === "independiente") {
+        pa = parseFloat(document.getElementById("pa_ind").value);
+        pb = parseFloat(document.getElementById("pb_ind").value);
+        if ([pa, pb].some(v => isNaN(v) || v < 0 || v > 1)) {
+          alert("Verifica los valores ingresados (0 a 1).");
+          return;
+        }
+        resultado = pa * pb;
+        document.getElementById("resultadoInd").innerHTML = `P(A ∩ B) = ${resultado.toFixed(3)}`;
+        document.getElementById("interpInd").innerText = `La probabilidad de que A y B ocurran juntos (independientes) es ${(resultado * 100).toFixed(1)}%.`;
+      } else {
+        pa = parseFloat(document.getElementById("pa_dep").value);
+        const pba = parseFloat(document.getElementById("pba_dep").value);
+        if ([pa, pba].some(v => isNaN(v) || v < 0 || v > 1)) {
+          alert("Verifica los valores ingresados (0 a 1).");
+          return;
+        }
+        resultado = pa * pba;
+        document.getElementById("resultadoDep").innerHTML = `P(A ∩ B) = ${resultado.toFixed(3)}`;
+        document.getElementById("interpDep").innerText = `La probabilidad conjunta considerando dependencia es ${(resultado * 100).toFixed(1)}%.`;
+      }
+
+      // Crear gráfico
+      grafico = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: tipo === "independiente" ? ["P(A)", "P(B)", "P(A∩B)"] : ["P(A)", "P(B|A)", "P(A∩B)"],
+          datasets: [{
+            data: tipo === "independiente" ? [pa, pb, resultado] : [pa, parseFloat(document.getElementById("pba_dep").value), resultado],
+            backgroundColor: ["#38bdf8", "#0ea5e9", "#0369a1"]
+          }]
+        },
+        options: { scales: { y: { beginAtZero: true, max: 1 } } }
+      });
+    }
+  </script>
+</body>
+</html>
