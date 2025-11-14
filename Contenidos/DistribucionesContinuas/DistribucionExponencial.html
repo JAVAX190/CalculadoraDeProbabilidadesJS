@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Distribución Exponencial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-teal-50 text-gray-800">
+  <header class="bg-teal-700 text-white py-6 text-center shadow">
+    <h1 class="text-2xl font-bold">Distribución Exponencial</h1>
+    <p class="text-teal-100">Relación con Poisson — Tiempo entre eventos</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+    <!-- Teoría -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-teal-700 mb-2">Relación con la distribución de Poisson</h2>
+      <p class="text-sm text-gray-700">
+        Si los eventos ocurren según una Poisson con tasa λ (eventos por unidad de tiempo),
+        el tiempo entre dos eventos consecutivos X sigue una <strong>Exponencial(λ)</strong>.
+      </p>
+      <p class="mt-3 text-sm">
+        Función de densidad: <strong>f(x) = λ e<sup>−λx</sup>, x ≥ 0</strong><br>
+        Función acumulada (CDF): <strong>F(x) = P(X ≤ x) = 1 − e<sup>−λx</sup></strong>
+      </p>
+      <img src="../../Recursos/R_DistrbucionContinua/funcionDensidad.png" alt="Fórmula Exponencial" class="mt-3 h-28 object-contain mx-auto">
+    </section>
+
+    <!-- Calculadora -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h2 class="text-lg font-semibold text-teal-700 mb-3">Calculadora Exponencial</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div>
+          <label class="text-sm">λ (tasa)</label>
+          <input id="exp_lambda" type="number" step="any" min="0" class="w-full border rounded px-2 py-1" placeholder="ej. 0.5">
+        </div>
+        <div>
+          <label class="text-sm">x o a</label>
+          <input id="exp_x1" type="number" step="any" min="0" class="w-full border rounded px-2 py-1" placeholder="ej. 2">
+        </div>
+        <div>
+          <label class="text-sm">b (opcional)</label>
+          <input id="exp_x2" type="number" step="any" min="0" class="w-full border rounded px-2 py-1" placeholder="ej. 6">
+        </div>
+        <div>
+          <label class="text-sm">Caso</label>
+          <select id="exp_tipo" class="w-full border rounded px-2 py-1">
+            <option value="menor">P(X ≤ x)</option>
+            <option value="mayor">P(X > x)</option>
+            <option value="entre">P(a < X < b)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-4 text-center">
+        <button id="btnCalcularExp" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Calcular</button>
+      </div>
+
+      <div id="exp_result" class="mt-4 text-center font-semibold"></div>
+
+      <canvas id="expChart" class="mt-6"></canvas>
+    </section>
+
+    <!-- Tabla de apoyo -->
+    <section class="bg-white rounded-2xl p-5 shadow border mb-6">
+      <h3 class="text-md font-semibold text-teal-700 mb-2">Tabla CDF (valores de ejemplo)</h3>
+      <div id="tablaExp" class="overflow-x-auto text-sm"></div>
+    </section>
+
+    <!-- Ejercicios -->
+    <section class="bg-white rounded-2xl p-5 shadow border">
+      <h2 class="text-lg font-semibold text-teal-700 mb-3">Ejercicios - Exponencial</h2>
+
+      <div class="flex gap-3 mb-4">
+        <button onclick="cargarEjExp('facil')" class="bg-green-600 text-white px-4 py-2 rounded">Fácil</button>
+        <button onclick="cargarEjExp('intermedio')" class="bg-yellow-500 text-white px-4 py-2 rounded">Intermedio</button>
+        <button onclick="cargarEjExp('dificil')" class="bg-red-600 text-white px-4 py-2 rounded">Difícil</button>
+      </div>
+
+      <div id="zonaExp" class="hidden bg-teal-50 rounded p-4 border"></div>
+    </section>
+
+    <div class="text-center mt-8">
+      <a href="DistribucionesContinuasMain.html" class="text-gray-700 hover:underline">← Volver al menú de distribuciones</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-12">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">[Tu nombre]</span></p>
+  </footer>
+
+<script>
+/* ------------------ Utilidades matemáticas ------------------ */
+function formatProb4(x){
+  if(x === 0) return "0.0000";
+  if(!isFinite(x)) return String(x);
+  if(Math.abs(x) < 1e-6) return x.toExponential(3);
+  return parseFloat(x).toFixed(4);
+}
+
+// CDF de Exponencial: P(X ≤ x) = 1 - e^{-λ x}
+function exponencialCDF(lambda, x){
+  if(x < 0) return 0;
+  return 1 - Math.exp(-lambda * x);
+}
+
+// Complemento: P(X > x) = e^{-λ x}
+// P(a < X < b) = e^{-λ a} - e^{-λ b}
+
+/* ------------------ Normalizador y mezclador de opciones ------------------ */
+function normalizarOpciones(ejArray){
+  ejArray.forEach(e => {
+    e.o = e.o.map(op => {
+      const n = parseFloat(String(op).replace(",", "."));
+      if(isNaN(n)) return String(op);
+      return parseFloat(n).toFixed(4);
+    });
+  });
+}
+
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function shuffleOptions(ejArray){
+  ejArray.forEach(e => {
+    const pairs = e.o.map((opt, idx) => ({opt: String(opt), idx: idx}));
+    shuffleArray(pairs);
+    const originalCorrectIndex = e.c;
+    const newIndex = pairs.findIndex(p => p.idx === originalCorrectIndex);
+    e.o = pairs.map(p => p.opt);
+    e.c = newIndex >= 0 ? newIndex : 0;
+  });
+}
+
+/* ------------------ Ejercicios (10/6/4) ------------------ */
+/* Las opciones las dejo con valores plausibles; el normalizador las convierte a 4 decimales */
+const ejerciciosExp = {
+  facil: [
+    {p:"λ=0.5: ¿P(X ≤ 2)?", o:["0.6321205588","0.5000","0.3000","0.7000"], c:0, e:"1−e^{-0.5·2}=0.6321"},
+    {p:"λ=0.2: ¿P(X > 3)?", o:["0.5488116361","0.4000","0.6000","0.7000"], c:0, e:"e^{-0.2·3}=0.5488"},
+    {p:"λ=0.1: ¿P(2 < X < 6)?", o:["0.329679953","0.3000","0.5000","0.7000"], c:0, e:"e^{-0.1·2}−e^{-0.1·6}=0.3297"},
+    {p:"λ=1: ¿P(X ≤ 0.5)?", o:["0.3935","0.5000","0.2500","0.1000"], c:0, e:"1−e^{-1·0.5}=0.3935"},
+    {p:"λ=0.8: ¿P(X > 1)?", o:["0.4493","0.3500","0.5500","0.2500"], c:0, e:"e^{-0.8·1}=0.4493"},
+    {p:"λ=0.3: ¿P(X ≤ 2)?", o:["0.4512","0.4000","0.5000","0.2500"], c:0, e:"1−e^{-0.3·2}=0.4512"},
+    {p:"λ=0.6: ¿P(X > 0.5)?", o:["0.7408","0.6000","0.3000","0.1000"], c:0, e:"e^{-0.6·0.5}=0.7408"},
+    {p:"λ=2: ¿P(X ≤ 1)?", o:["0.8647","0.8000","0.5000","0.2500"], c:0, e:"1−e^{-2·1}=0.8647"},
+    {p:"λ=0.4: ¿P(X = 0)? (nota: en continuo se aproxima a 0)", o:["0.9608","0.0000","0.5000","0.1000"], c:0, e:"P(X=0) en continuo → densidad en 0 = λ = 0.4 (interpretación continua)"},
+    {p:"λ=1.5: ¿P(X > 2)?", o:["0.0498","0.1000","0.2000","0.0500"], c:0, e:"e^{-1.5·2}=0.0498"}
+  ],
+  intermedio: [
+    {p:"λ=0.7: ¿P(X ≤ 3)?", o:["0.8791","0.8000","0.9000","0.7000"], c:0, e:"1−e^{-0.7·3}=0.8791"},
+    {p:"λ=1.2: ¿P(0.5 < X < 2)?", o:["0.5410","0.6000","0.4000","0.3000"], c:0, e:"e^{-1.2·0.5}−e^{-1.2·2}=0.5410"},
+    {p:"λ=0.25: ¿P(X > 10)?", o:["0.0821","0.0500","0.1000","0.2000"], c:0, e:"e^{-0.25·10}=0.0821"},
+    {p:"λ=0.9: ¿P(X ≤ 0.2)?", o:["0.1653","0.2000","0.1000","0.0500"], c:0, e:"1−e^{-0.9·0.2}=0.1653"},
+    {p:"λ=0.15: ¿P(5 < X < 15)?", o:["0.2386","0.3000","0.2000","0.1000"], c:0, e:"e^{-0.15·5}−e^{-0.15·15}≈0.2386"},
+    {p:"λ=0.6: ¿P(X ≤ 0.1)?", o:["0.0582","0.1000","0.2000","0.0500"], c:0, e:"1−e^{-0.6·0.1}=0.0582"}
+  ],
+  dificil: [
+    {p:"λ=1.8: ¿P(0.2 < X < 4)?", o:["0.9933","0.9000","0.8000","0.7000"], c:0, e:"e^{-1.8·0.2}−e^{-1.8·4}≈0.9933"},
+    {p:"λ=2.5: ¿P(X > 0.1)?", o:["0.7788","0.8000","0.6000","0.4000"], c:0, e:"e^{-2.5·0.1}=0.7788"},
+    {p:"λ=0.05: ¿P(X ≤ 20)?", o:["0.6321","0.7000","0.5000","0.4000"], c:0, e:"1−e^{-0.05·20}=0.6321"},
+    {p:"λ=3.2: ¿P(1 < X < 2.5)?", o:["0.5648","0.6000","0.4000","0.3000"], c:0, e:"e^{-3.2·1}−e^{-3.2·2.5}≈0.5648"}
+  ]
+};
+
+// aplicar normalizador y mezclar opciones para evitar patrón
+normalizarOpciones(ejerciciosExp.facil);
+normalizarOpciones(ejerciciosExp.intermedio);
+normalizarOpciones(ejerciciosExp.dificil);
+shuffleOptions(ejerciciosExp.facil);
+shuffleOptions(ejerciciosExp.intermedio);
+shuffleOptions(ejerciciosExp.dificil);
+
+/* ------------------ Gráfico (Chart.js) ------------------ */
+let expChart;
+function graficarExponencial(lambda, x1, x2, tipo){
+  const ctx = document.getElementById('expChart');
+  const xs = [];
+  const ys = [];
+  const shade = [];
+  const maxX = Math.max( (x2 || x1 || 1) + 3, 10 );
+  const step = maxX / 200;
+  for(let x=0; x<=maxX; x+=step){
+    const y = lambda * Math.exp(-lambda * x); // PDF
+    xs.push(parseFloat(x.toFixed(4)));
+    ys.push(parseFloat(y.toFixed(8)));
+    if(tipo === 'menor' && x <= x1) shade.push(y);
+    else if(tipo === 'mayor' && x >= x1) shade.push(y);
+    else if(tipo === 'entre' && x >= x1 && x <= x2) shade.push(y);
+    else shade.push(null);
+  }
+
+  if(expChart) expChart.destroy();
+  expChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: xs,
+      datasets: [
+        { label: 'f(x) = λ e^{−λx}', data: ys, borderColor: '#0f766e', fill: false, pointRadius: 0 },
+        { label: 'Área', data: shade, borderColor: '#0f766e', backgroundColor: 'rgba(6,95,70,0.25)', fill: true, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { title: { display: true, text: 'x' } }, y: { title: { display: true, text: 'f(x)' } } }
+    }
+  });
+}
+
+/* ------------------ Tabla CDF dinámica ------------------ */
+function generarTablaExp(){
+  const cont = document.getElementById('tablaExp');
+  let html = "<table class='border-collapse w-full'><thead><tr><th class='border px-2 bg-teal-100'>λ</th><th class='border px-2 bg-teal-100'>x</th><th class='border px-2 bg-teal-100'>F(x) = P(X ≤ x)</th></tr></thead><tbody>";
+  const lambdas = [0.1, 0.25, 0.5, 1, 2];
+  const xs = [0.5,1,2,5,10];
+  lambdas.forEach(l => {
+    xs.forEach(x => {
+      const val = exponencialCDF(l,x);
+      html += `<tr><td class='border px-2 text-center'>${l}</td><td class='border px-2 text-center'>${x}</td><td class='border px-2 text-center'>${val.toFixed(4)}</td></tr>`;
+    });
+  });
+  html += "</tbody></table>";
+  cont.innerHTML = html;
+}
+generarTablaExp();
+
+/* ------------------ Calculadora UI ------------------ */
+document.getElementById('btnCalcularExp').addEventListener('click', function(){
+  const lambda = parseFloat(document.getElementById('exp_lambda').value);
+  const x1 = parseFloat(document.getElementById('exp_x1').value);
+  const x2 = parseFloat(document.getElementById('exp_x2').value);
+  const tipo = document.getElementById('exp_tipo').value;
+  const out = document.getElementById('exp_result');
+
+  if(isNaN(lambda) || lambda <= 0){
+    alert('Ingresa un λ válido (> 0).');
+    return;
+  }
+
+  if(tipo === 'menor'){
+    if(isNaN(x1) || x1 < 0){ alert('Ingresa un x válido (≥ 0).'); return; }
+    const res = exponencialCDF(lambda, x1);
+    out.innerHTML = 'P = ' + formatProb4(res);
+    graficarExponencial(lambda, x1, null, 'menor');
+  } else if(tipo === 'mayor'){
+    if(isNaN(x1) || x1 < 0){ alert('Ingresa un x válido (≥ 0).'); return; }
+    const res = Math.exp(-lambda * x1);
+    out.innerHTML = 'P = ' + formatProb4(res);
+    graficarExponencial(lambda, x1, null, 'mayor');
+  } else if(tipo === 'entre'){
+    if(isNaN(x1) || isNaN(x2) || x1 < 0 || x2 <= x1){ alert('Ingresa a y b con 0 ≤ a < b.'); return; }
+    const res = Math.exp(-lambda * x1) - Math.exp(-lambda * x2);
+    out.innerHTML = 'P = ' + formatProb4(res);
+    graficarExponencial(lambda, x1, x2, 'entre');
+  }
+});
+
+/* ------------------ Ejercicios UI ------------------ */
+let exp_idx = 0, exp_score = 0, exp_list = [];
+
+function cargarEjExp(level){
+  exp_list = ejerciciosExp[level].slice();
+  exp_idx = 0; exp_score = 0;
+  document.getElementById('zonaExp').classList.remove('hidden');
+  mostrarExp();
+}
+
+function mostrarExp(){
+  const e = exp_list[exp_idx];
+  document.getElementById('zonaExp').innerHTML = `
+    <div class='mb-3 font-semibold text-teal-700'>Ejercicio ${exp_idx+1} de ${exp_list.length}</div>
+    <div class='mb-3'>${e.p}</div>
+    ${e.o.map((op,i)=>`<label class='block border rounded px-3 py-2 hover:bg-teal-100'><input type='radio' name='expop' value='${i}' class='mr-2'>${op}</label>`).join('')}
+    <div class='text-center mt-3'><button id='btnComprobarExp' class='bg-teal-600 text-white px-4 py-2 rounded'>Comprobar</button></div>
+    <div id='exp_retro' class='mt-3 text-center font-semibold'></div>
+    <div class='text-center mt-3'><button id='exp_sig' class='hidden bg-gray-700 text-white px-3 py-1 rounded'>Siguiente</button></div>
+  `;
+  document.getElementById('btnComprobarExp').onclick = comprobarExp;
+  document.getElementById('exp_sig').onclick = sigExp;
+}
+
+function comprobarExp(){
+  const sel = document.querySelector("input[name='expop']:checked");
+  if(!sel){ alert('Selecciona una opción'); return; }
+  const e = exp_list[exp_idx];
+  const idx = parseInt(sel.value,10);
+  const retro = document.getElementById('exp_retro');
+  if(idx === e.c){
+    exp_score++;
+    retro.innerHTML = '✅ Correcto. ' + e.e;
+    retro.className = 'text-green-700 font-semibold';
+  } else {
+    retro.innerHTML = '❌ Incorrecto. ' + e.e;
+    retro.className = 'text-red-700 font-semibold';
+  }
+  document.getElementById('exp_sig').classList.remove('hidden');
+}
+
+function sigExp(){
+  exp_idx++;
+  if(exp_idx < exp_list.length) mostrarExp();
+  else {
+    document.getElementById('zonaExp').innerHTML = "<h3 class='text-center font-bold text-teal-700'>¡Terminado!</h3><p class='text-center mt-2'>Puntaje: "+exp_score+"/"+exp_list.length+"</p>";
+  }
+}
+</script>
+</body>
+</html>

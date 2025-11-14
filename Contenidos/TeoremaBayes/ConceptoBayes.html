@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teorema de Bayes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-orange-50 to-white text-gray-800">
+
+  <!-- Encabezado -->
+  <header class="bg-red-600 text-white py-6 text-center shadow-md">
+    <h1 class="text-3xl font-bold">Teorema de Bayes</h1>
+    <p class="text-red-100">Inferencia probabilística y actualización de creencias</p>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-6 space-y-10">
+
+    <!-- Concepto e interpretación -->
+    <section class="bg-white rounded-2xl shadow p-6 border">
+      <h2 class="text-2xl font-semibold text-red-700 mb-4">📘 Concepto e interpretación del teorema</h2>
+      <p class="text-justify mb-4">
+        El <strong>Teorema de Bayes</strong> nos permite actualizar la probabilidad de un evento a partir de nueva información. 
+        Es una herramienta clave en la estadística inferencial y la teoría de la decisión.
+      </p>
+      <div class="text-center my-4">
+        <p class="font-semibold text-lg text-red-700">P(A | B) = [ P(B | A) × P(A) ] / P(B)</p>
+      </div>
+      <p>
+        Donde:
+        <ul class="list-disc ml-8 my-3 text-sm">
+          <li><strong>P(A)</strong>: Probabilidad previa (antes de la evidencia).</li>
+          <li><strong>P(B|A)</strong>: Probabilidad de la evidencia, dada la hipótesis.</li>
+          <li><strong>P(B)</strong>: Probabilidad total de la evidencia.</li>
+          <li><strong>P(A|B)</strong>: Probabilidad posterior, una vez observada la evidencia.</li>
+        </ul>
+      </p>
+      <p class="mt-3">
+        En otras palabras, el Teorema de Bayes nos ayuda a ajustar nuestras creencias cuando recibimos datos nuevos.
+      </p>
+    </section>
+
+    <!-- Identificación de probabilidades -->
+    <section class="bg-white rounded-2xl shadow p-6 border">
+      <h2 class="text-2xl font-semibold text-red-700 mb-4">🧩 Identificación de probabilidades previas, verdaderos y falsos positivos</h2>
+      <p>
+        En muchos casos, especialmente en diagnósticos médicos, trabajamos con:
+      </p>
+      <ul class="list-disc ml-8 my-4 text-sm">
+        <li><strong>Probabilidad previa (P(A))</strong>: Qué tan frecuente es una condición antes de hacer pruebas.</li>
+        <li><strong>Verdaderos positivos (P(B|A))</strong>: Probabilidad de que la prueba dé positiva si realmente la persona tiene la condición.</li>
+        <li><strong>Falsos positivos (P(B|¬A))</strong>: Probabilidad de que la prueba dé positiva aunque la persona no tenga la condición.</li>
+      </ul>
+
+      <div class="mt-3 text-sm text-gray-700">
+        Por ejemplo, si el 2% de la población tiene una enfermedad (<strong>P(A)=0.02</strong>),
+        y una prueba detecta correctamente al 99% de los enfermos (<strong>P(B|A)=0.99</strong>),
+        pero da falsos positivos en el 5% de los sanos (<strong>P(B|¬A)=0.05</strong>), 
+        el Teorema de Bayes permite saber qué probabilidad real hay de estar enfermo si la prueba dio positiva.
+      </div>
+    </section>
+
+    <!-- Aplicaciones prácticas -->
+    <section class="bg-white rounded-2xl shadow p-6 border">
+      <h2 class="text-2xl font-semibold text-red-700 mb-4">⚙️ Aplicaciones prácticas</h2>
+      <ul class="list-disc ml-8 text-sm mb-4">
+        <li><strong>Diagnóstico médico:</strong> Determinar la probabilidad real de padecer una enfermedad tras un resultado positivo o negativo.</li>
+        <li><strong>Confiabilidad de sistemas:</strong> Calcular la probabilidad de que un sistema haya fallado dado que un sensor se activó.</li>
+        <li><strong>Aprendizaje automático:</strong> Clasificación y predicción basada en probabilidades actualizadas.</li>
+      </ul>
+      <p>Veamos cómo aplicar el teorema con la siguiente calculadora:</p>
+    </section>
+
+    <!-- Calculadora -->
+    <section class="bg-white rounded-2xl shadow p-6 border">
+      <h2 class="text-2xl font-semibold text-red-700 mb-4">🧮 Calculadora de Bayes</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">P(A)</label>
+          <input type="number" id="pA" step="any" min="0" max="1" class="w-full border rounded px-3 py-2" placeholder="Ej. 0.02">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">P(B|A)</label>
+          <input type="number" id="pBA" step="any" min="0" max="1" class="w-full border rounded px-3 py-2" placeholder="Ej. 0.99">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">P(B)</label>
+          <input type="number" id="pB" step="any" min="0" max="1" class="w-full border rounded px-3 py-2" placeholder="Ej. 0.05">
+        </div>
+        <div class="flex items-end">
+          <button onclick="calcularBayes()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 w-full">Calcular</button>
+        </div>
+      </div>
+
+      <div id="resultado" class="mt-6 text-center text-lg font-semibold"></div>
+
+      <div id="tablaContenedor" class="hidden mt-8 overflow-x-auto">
+        <table class="min-w-full text-center border border-gray-300 rounded-xl">
+          <thead class="bg-red-100 text-red-700 font-semibold">
+            <tr>
+              <th class="p-2 border">P(A)</th>
+              <th class="p-2 border">P(B|A)</th>
+              <th class="p-2 border">P(B)</th>
+              <th class="p-2 border">P(A|B)</th>
+            </tr>
+          </thead>
+          <tbody id="tablaDatos" class="text-gray-700"></tbody>
+        </table>
+      </div>
+
+      <div id="graficaContenedor" class="hidden mt-8">
+        <canvas id="grafica"></canvas>
+      </div>
+    </section>
+
+    <!-- Ejercicios -->
+    <section class="bg-white rounded-2xl shadow p-6 border">
+      <h2 class="text-2xl font-semibold text-red-700 mb-4">🧠 Ejercicios prácticos</h2>
+      <div class="flex justify-center gap-4 mb-6">
+        <button onclick="cargarEjercicios('facil')" class="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">Fácil</button>
+        <button onclick="cargarEjercicios('intermedio')" class="px-5 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600">Intermedio</button>
+        <button onclick="cargarEjercicios('dificil')" class="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Difícil</button>
+      </div>
+
+      <div id="zonaEjercicio" class="hidden bg-orange-50 rounded-2xl p-6 border border-orange-200"></div>
+    </section>
+
+    <div class="text-center mt-10">
+      <a href="../../index.html" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 w-full">   
+        ← Volver al inicio
+      </a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-10">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span></p>
+  </footer>
+
+  <script>
+  let grafica=null;
+
+  function calcularBayes(){
+    const pA=parseFloat(document.getElementById("pA").value);
+    const pBA=parseFloat(document.getElementById("pBA").value);
+    const pB=parseFloat(document.getElementById("pB").value);
+    if(isNaN(pA)||isNaN(pBA)||isNaN(pB)||pB<=0){alert("Ingresa valores válidos.");return;}
+    const resultado=(pBA*pA)/pB;
+    document.getElementById("resultado").innerHTML=`📈 <strong>Resultado: P(A|B) = ${resultado.toExponential(3).replace(".", ",")}</strong>`;
+    document.getElementById("tablaContenedor").classList.remove("hidden");
+    document.getElementById("tablaDatos").innerHTML=`<tr><td class="border p-2">${pA}</td><td class="border p-2">${pBA}</td><td class="border p-2">${pB}</td><td class="border p-2">${resultado.toFixed(4)}</td></tr>`;
+    graficar(resultado);
+  }
+
+  function graficar(v){
+    const ctx=document.getElementById("grafica");
+    document.getElementById("graficaContenedor").classList.remove("hidden");
+    if(grafica)grafica.destroy();
+    grafica=new Chart(ctx,{
+      type:'bar',
+      data:{labels:['P(A|B)'],datasets:[{data:[v],backgroundColor:['#ef4444']}]},
+      options:{scales:{y:{beginAtZero:true,max:1}}}
+    });
+  }
+
+  // --- Ejercicios ---
+  const ejercicios={
+    facil:[
+      {p:"Si P(A)=0.02, P(B|A)=0.99, P(B)=0.05 → P(A|B)?",o:["0.396","0.25","0.20","0.12"],c:0,e:"(0.99×0.02)/0.05=0.396"},
+      {p:"P(A)=0.1, P(B|A)=0.8, P(B)=0.4 → P(A|B)?",o:["0.2","0.25","0.15","0.3"],c:0,e:"(0.8×0.1)/0.4=0.2"},
+      {p:"P(A)=0.05, P(B|A)=0.9, P(B)=0.2 → P(A|B)?",o:["0.225","0.25","0.3","0.15"],c:0,e:"(0.9×0.05)/0.2=0.225"},
+      {p:"P(A)=0.4, P(B|A)=0.7, P(B)=0.6 → P(A|B)?",o:["0.466","0.5","0.3","0.25"],c:0,e:"(0.7×0.4)/0.6=0.466"},
+      {p:"P(A)=0.25, P(B|A)=0.6, P(B)=0.5 → P(A|B)?",o:["0.3","0.4","0.35","0.25"],c:0,e:"(0.6×0.25)/0.5=0.3"},
+    ],
+    intermedio:[
+      {p:"P(A)=0.02, P(B|A)=0.95, P(B)=0.1 → P(A|B)?",o:["0.19","0.15","0.25","0.12"],c:0,e:"(0.95×0.02)/0.1=0.19"},
+      {p:"P(A)=0.05, P(B|A)=0.85, P(B)=0.15 → P(A|B)?",o:["0.283","0.2","0.25","0.3"],c:0,e:"(0.85×0.05)/0.15=0.283"},
+    ],
+    dificil:[
+      {p:"P(A)=0.005, P(B|A)=0.98, P(B)=0.06 → P(A|B)?",o:["0.0817","0.09","0.07","0.05"],c:0,e:"(0.98×0.005)/0.06≈0.0817"},
+      {p:"P(A)=0.01, P(B|A)=0.99, P(B)=0.05 → P(A|B)?",o:["0.198","0.25","0.15","0.10"],c:0,e:"(0.99×0.01)/0.05=0.198"},
+    ]
+  };
+
+  let actual=0,aciertos=0,lista=[],dificultad="";
+
+  function cargarEjercicios(dif){
+    dificultad=dif;lista=ejercicios[dif].slice();actual=0;aciertos=0;
+    document.getElementById("zonaEjercicio").classList.remove("hidden");
+    mostrarEjercicio();
+  }
+
+  function mostrarEjercicio(){
+    const e=lista[actual];
+    document.getElementById("zonaEjercicio").innerHTML=`
+      <div class='mb-3 font-semibold text-red-700'>Ejercicio ${actual+1} de ${lista.length}</div>
+      <h3 class='mb-4 font-medium'>${e.p}</h3>
+      ${e.o.map((op,i)=>`<label class='block border rounded px-3 py-2 cursor-pointer hover:bg-orange-50'>
+        <input type='radio' name='op' value='${i}' class='mr-2'>${op}</label>`).join("")}
+      <button onclick='comprobarRespuesta()' class='mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700'>Comprobar</button>
+      <div id='retroalimentacion' class='mt-4 text-center text-lg font-semibold'></div>`;
+  }
+
+  function comprobarRespuesta(){
+    const sel=document.querySelector('input[name="op"]:checked');
+    if(!sel)return alert("Selecciona una opción");
+    const e=lista[actual];const idx=parseInt(sel.value);
+    const retro=document.getElementById("retroalimentacion");
+    if(idx===e.c){aciertos++;retro.innerHTML="✅ Correcto. "+e.e;retro.className="text-green-700 font-semibold";}
+    else{retro.innerHTML="❌ Incorrecto. "+e.e;retro.className="text-red-700 font-semibold";}
+    setTimeout(()=>{siguienteEjercicio();},1800);
+  }
+
+  function siguienteEjercicio(){
+    actual++;
+    if(actual<lista.length)mostrarEjercicio();
+    else{
+      document.getElementById("zonaEjercicio").innerHTML=`<h2 class='text-2xl text-center text-red-700 font-bold'>¡Completado!</h2>
+      <p class='text-center mt-4'>Tu puntaje final es <strong>${aciertos}/${lista.length}</strong>.</p>`;
+    }
+  }
+  </script>
+
+</body>
+</html>

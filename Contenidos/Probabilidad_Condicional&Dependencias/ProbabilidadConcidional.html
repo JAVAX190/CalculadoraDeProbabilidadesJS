@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Probabilidad Condicional y Dependencias</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-indigo-50 to-white text-gray-800">
+  <!-- Encabezado -->
+  <header class="bg-indigo-700 text-white py-6 text-center shadow-md">
+    <h1 class="text-3xl font-bold">Probabilidad Condicional y Dependencias</h1>
+    <p class="text-indigo-100">Aplicaciones con tablas, contextos reales y diferencias entre tipos de eventos</p>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-6">
+    
+    <!-- Introducción -->
+    <section class="mb-8 text-justify leading-relaxed">
+      <h2 class="text-2xl font-semibold text-indigo-700 mb-3">📘 Probabilidad Condicional</h2>
+      <p>
+        La <strong>probabilidad condicional</strong> mide la probabilidad de que ocurra un evento A, sabiendo que otro evento B ya ha ocurrido.  
+        Se representa como <strong>P(A | B)</strong> y se calcula mediante la fórmula:
+      </p>
+      <p class="text-center font-semibold text-indigo-600 text-lg mb-3 mt-2">P(A | B) = P(A ∩ B) / P(B)</p>
+      <p>
+        Esta probabilidad se aplica en contextos donde los eventos están relacionados, como diagnósticos médicos, control de calidad o análisis de datos.
+      </p>
+    </section>
+
+    <!-- Calculadora -->
+    <section class="bg-white rounded-2xl shadow p-6 mb-10 border">
+      <h2 class="text-2xl font-semibold text-indigo-700 mb-4">🧮 Calculadora de Probabilidad</h2>
+
+      <div class="mb-5">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de evento</label>
+        <select id="tipoEvento" class="border rounded px-3 py-2 w-full">
+          <option value="condicional">Probabilidad condicional (P(A|B))</option>
+          <option value="independientes">Eventos independientes (P(A∩B)=P(A)×P(B))</option>
+          <option value="dependientes">Eventos dependientes (P(A∩B)=P(A)×P(B|A))</option>
+        </select>
+      </div>
+
+      <!-- Campos dinámicos -->
+      <div id="campos" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+      <div id="resultado" class="mt-6 text-center text-lg font-semibold"></div>
+      <div id="explicacion" class="text-center text-sm text-gray-600 mt-2"></div>
+
+      <!-- Tabla resumen -->
+      <div id="tablaContenedor" class="hidden mt-8 overflow-x-auto">
+        <table class="min-w-full text-center border border-gray-300 rounded-xl">
+          <thead class="bg-indigo-100 text-indigo-700 font-semibold">
+            <tr>
+              <th class="p-2 border">P(A)</th>
+              <th class="p-2 border">P(B)</th>
+              <th class="p-2 border">P(B|A)</th>
+              <th class="p-2 border">P(A∩B)</th>
+              <th class="p-2 border">P(A|B)</th>
+            </tr>
+          </thead>
+          <tbody id="tablaDatos" class="text-gray-700"></tbody>
+        </table>
+      </div>
+
+      <div id="graficaContenedor" class="hidden mt-8">
+        <canvas id="grafica"></canvas>
+      </div>
+    </section>
+
+    <!-- Ejercicios -->
+    <section class="mb-10">
+      <h2 class="text-2xl font-semibold text-indigo-700 mb-4">🧩 Ejercicios de práctica</h2>
+
+      <div class="flex justify-center gap-4 mb-6">
+        <button onclick="cargarEjercicios('facil')" class="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">Fácil</button>
+        <button onclick="cargarEjercicios('intermedio')" class="px-5 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600">Intermedio</button>
+        <button onclick="cargarEjercicios('dificil')" class="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Difícil</button>
+      </div>
+
+      <div id="zonaEjercicio" class="hidden bg-white rounded-2xl shadow p-6 border">
+        <div class="flex justify-between items-center mb-3">
+          <span id="contador" class="font-semibold text-indigo-700"></span>
+          <span id="puntaje" class="font-semibold text-gray-700"></span>
+        </div>
+
+        <h2 id="pregunta" class="text-lg font-semibold mb-4"></h2>
+        <div id="opciones" class="space-y-2 mb-4"></div>
+
+        <button onclick="comprobarRespuesta()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Comprobar respuesta</button>
+
+        <div id="retroalimentacion" class="mt-4 text-center text-lg font-semibold"></div>
+
+        <div class="mt-6 text-center">
+          <button onclick="siguienteEjercicio()" id="btnSiguiente" class="hidden bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">Siguiente</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Botón volver -->
+    <div class="text-center mt-10">
+      <a href="../../index.html" class="inline-block bg-sky-700 text-white px-6 py-2 rounded-xl hover:bg-sky-800 transition">
+        ← Volver al inicio
+      </a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-10">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span></p>
+  </footer>
+
+  <script>
+  let grafica = null;
+
+  // Inicializa campos
+  actualizarCampos();
+
+  document.getElementById("tipoEvento").addEventListener("change", actualizarCampos);
+
+  function actualizarCampos() {
+    const tipo = document.getElementById("tipoEvento").value;
+    const cont = document.getElementById("campos");
+    if (tipo === "condicional") {
+      cont.innerHTML = `
+        <div><label>P(A ∩ B)</label><input type="number" id="pInter" step="any" class="w-full border rounded px-3 py-2"></div>
+        <div><label>P(B)</label><input type="number" id="pB" step="any" class="w-full border rounded px-3 py-2"></div>
+        <div class="flex items-end"><button onclick="calcularProbabilidad()" class="bg-indigo-600 text-white px-4 py-2 rounded w-full">Calcular</button></div>`;
+    } else if (tipo === "independientes") {
+      cont.innerHTML = `
+        <div><label>P(A)</label><input type="number" id="pA" step="any" class="w-full border rounded px-3 py-2"></div>
+        <div><label>P(B)</label><input type="number" id="pB" step="any" class="w-full border rounded px-3 py-2"></div>
+        <div class="flex items-end"><button onclick="calcularProbabilidad()" class="bg-indigo-600 text-white px-4 py-2 rounded w-full">Calcular</button></div>`;
+    } else {
+      cont.innerHTML = `
+        <div><label>P(A)</label><input type="number" id="pA" step="any" class="w-full border rounded px-3 py-2"></div>
+        <div><label>P(B|A)</label><input type="number" id="pBA" step="any" class="w-full border rounded px-3 py-2"></div>
+        <div class="flex items-end"><button onclick="calcularProbabilidad()" class="bg-indigo-600 text-white px-4 py-2 rounded w-full">Calcular</button></div>`;
+    }
+  }
+
+  function calcularProbabilidad() {
+    const tipo = document.getElementById("tipoEvento").value;
+    let resultado, datos = {pA: "-", pB: "-", pBA: "-", pInter: "-", pAB: "-"};
+    if (tipo === "condicional") {
+      const pInter = parseFloat(document.getElementById("pInter").value);
+      const pB = parseFloat(document.getElementById("pB").value);
+      resultado = pInter / pB;
+      datos.pB = pB; datos.pInter = pInter; datos.pAB = resultado;
+    } else if (tipo === "independientes") {
+      const pA = parseFloat(document.getElementById("pA").value);
+      const pB = parseFloat(document.getElementById("pB").value);
+      resultado = pA * pB;
+      datos.pA = pA; datos.pB = pB; datos.pInter = resultado;
+    } else {
+      const pA = parseFloat(document.getElementById("pA").value);
+      const pBA = parseFloat(document.getElementById("pBA").value);
+      resultado = pA * pBA;
+      datos.pA = pA; datos.pBA = pBA; datos.pInter = resultado;
+    }
+
+    document.getElementById("resultado").innerHTML = `📈 <strong>Resultado: ${resultado.toExponential(3).replace(".", ",")}</strong>`;
+    mostrarTabla(datos);
+    generarGrafica(resultado);
+  }
+
+  function mostrarTabla(d) {
+    document.getElementById("tablaContenedor").classList.remove("hidden");
+    document.getElementById("tablaDatos").innerHTML = `
+      <tr><td class="border p-2">${d.pA}</td><td class="border p-2">${d.pB}</td>
+      <td class="border p-2">${d.pBA}</td><td class="border p-2">${d.pInter}</td>
+      <td class="border p-2">${d.pAB}</td></tr>`;
+  }
+
+  function generarGrafica(v) {
+    const ctx = document.getElementById("grafica");
+    document.getElementById("graficaContenedor").classList.remove("hidden");
+    if (grafica) grafica.destroy();
+    grafica = new Chart(ctx, {
+      type: 'bar',
+      data: {labels: ['Resultado'], datasets: [{data: [v], backgroundColor: ['#6366f1']}]},
+      options: {scales: {y: {beginAtZero: true, max: 1}}}
+    });
+  }
+
+  // ---- EJERCICIOS ----
+  const ejercicios = {
+    facil: [
+      {p: "Si P(A∩B)=0.2 y P(B)=0.5, ¿P(A|B)?", o: ["0.4","0.2","0.5","0.3"], c: 0, e: "0.2 / 0.5 = 0.4"},
+      {p: "Si P(A)=0.4 y P(B)=0.5, eventos independientes, ¿P(A∩B)?", o: ["0.2","0.3","0.4","0.25"], c: 0, e: "0.4×0.5=0.2"},
+      {p: "Si P(A)=0.6 y P(B|A)=0.5, eventos dependientes, ¿P(A∩B)?", o: ["0.3","0.4","0.25","0.2"], c: 0, e: "0.6×0.5=0.3"},
+      {p: "P(A∩B)=0.1, P(B)=0.4 → ¿P(A|B)?", o: ["0.25","0.3","0.2","0.15"], c: 0, e: "0.1/0.4=0.25"},
+      {p: "P(A)=0.2, P(B)=0.3, independientes → ¿P(A∩B)?", o: ["0.06","0.1","0.4","0.5"], c: 0, e: "0.2×0.3=0.06"},
+      {p: "P(A)=0.5, P(B|A)=0.4, dependientes → ¿P(A∩B)?", o: ["0.2","0.3","0.4","0.1"], c: 0, e: "0.5×0.4=0.2"},
+      {p: "P(A)=0.3, P(B)=0.5, independientes → ¿P(A∩B)?", o: ["0.15","0.25","0.2","0.1"], c: 0, e: "0.3×0.5=0.15"},
+      {p: "P(A∩B)=0.25, P(B)=0.5 → ¿P(A|B)?", o: ["0.5","0.4","0.25","0.2"], c: 0, e: "0.25/0.5=0.5"},
+      {p: "P(A)=0.8, P(B)=0.4, independientes → ¿P(A∩B)?", o: ["0.32","0.4","0.3","0.25"], c: 0, e: "0.8×0.4=0.32"},
+      {p: "P(A)=0.9, P(B|A)=0.5, dependientes → ¿P(A∩B)?", o: ["0.45","0.4","0.35","0.5"], c: 0, e: "0.9×0.5=0.45"}
+    ],
+    intermedio: [
+      {p: "P(A∩B)=0.12, P(B)=0.3 → ¿P(A|B)?", o: ["0.4","0.3","0.5","0.6"], c: 0, e: "0.12/0.3=0.4"},
+      {p: "P(A)=0.5, P(B)=0.4 → independientes → ¿P(A∩B)?", o: ["0.2","0.25","0.3","0.15"], c: 0, e: "0.5×0.4=0.2"},
+      {p: "P(A)=0.6, P(B|A)=0.2 → dependientes → ¿P(A∩B)?", o: ["0.12","0.2","0.3","0.1"], c: 0, e: "0.6×0.2=0.12"},
+      {p: "P(A)=0.3, P(B)=0.4 → independientes → ¿P(A∩B)?", o: ["0.12","0.2","0.1","0.3"], c: 0, e: "0.3×0.4=0.12"},
+      {p: "P(A∩B)=0.15, P(B)=0.5 → ¿P(A|B)?", o: ["0.3","0.4","0.5","0.25"], c: 0, e: "0.15/0.5=0.3"},
+      {p: "P(A)=0.7, P(B|A)=0.4 → dependientes → ¿P(A∩B)?", o: ["0.28","0.3","0.2","0.4"], c: 0, e: "0.7×0.4=0.28"}
+    ],
+    dificil: [
+      {p: "P(A)=0.5, P(B)=0.5, independientes → ¿P(A∩B)?", o: ["0.25","0.3","0.2","0.4"], c: 0, e: "0.5×0.5=0.25"},
+      {p: "P(A)=0.6, P(B|A)=0.3 → dependientes → ¿P(A∩B)?", o: ["0.18","0.2","0.25","0.15"], c: 0, e: "0.6×0.3=0.18"},
+      {p: "P(A∩B)=0.05, P(B)=0.25 → ¿P(A|B)?", o: ["0.2","0.3","0.25","0.15"], c: 0, e: "0.05/0.25=0.2"},
+      {p: "P(A)=0.8, P(B)=0.7, independientes → ¿P(A∩B)?", o: ["0.56","0.5","0.6","0.7"], c: 0, e: "0.8×0.7=0.56"}
+    ]
+  };
+
+  let actual=0,aciertos=0,lista=[],dificultad="";
+
+  function cargarEjercicios(dif){
+    dificultad=dif; lista=ejercicios[dif].slice(); actual=0; aciertos=0;
+    document.getElementById("zonaEjercicio").classList.remove("hidden");
+    mostrarEjercicio();
+  }
+
+  function mostrarEjercicio(){
+    const e=lista[actual];
+    document.getElementById("pregunta").textContent=e.p;
+    document.getElementById("contador").textContent=`Ejercicio ${actual+1} de ${lista.length}`;
+    document.getElementById("puntaje").textContent=`Aciertos: ${aciertos}`;
+    document.getElementById("opciones").innerHTML=e.o.map((op,i)=>`
+      <label class='block border rounded px-3 py-2 cursor-pointer hover:bg-indigo-50'>
+      <input type='radio' name='op' value='${i}' class='mr-2'>${op}</label>`).join("");
+    document.getElementById("retroalimentacion").textContent="";
+    document.getElementById("btnSiguiente").classList.add("hidden");
+  }
+
+  function comprobarRespuesta(){
+    const sel=document.querySelector('input[name="op"]:checked');
+    if(!sel)return alert("Selecciona una opción");
+    const e=lista[actual]; const idx=parseInt(sel.value);
+    const retro=document.getElementById("retroalimentacion");
+    if(idx===e.c){aciertos++;retro.innerHTML="✅ Correcto. "+e.e;retro.className="text-green-700 font-semibold";}
+    else{retro.innerHTML="❌ Incorrecto. "+e.e;retro.className="text-red-700 font-semibold";}
+    document.getElementById("btnSiguiente").classList.remove("hidden");
+    document.getElementById("puntaje").textContent=`Aciertos: ${aciertos}`;
+  }
+
+  function siguienteEjercicio(){
+    actual++;
+    if(actual<lista.length)mostrarEjercicio();
+    else{
+      document.getElementById("zonaEjercicio").innerHTML=`<h2 class='text-2xl text-center text-indigo-700 font-bold'>¡Completado!</h2>
+      <p class='text-center mt-4'>Tu puntaje final es <strong>${aciertos}/${lista.length}</strong>.</p>`;
+    }
+  }
+  </script>
+</body>
+</html>

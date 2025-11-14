@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combinaciones</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-emerald-50 to-white text-gray-800">
+
+  <!-- Encabezado -->
+  <header class="bg-emerald-700 text-white py-6 text-center shadow-md">
+    <h1 class="text-3xl font-bold">Combinaciones</h1>
+    <p class="text-emerald-200">Selección de elementos sin importar el orden</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+
+    <!-- Explicación teórica -->
+    <section class="mb-8 text-center">
+      <p class="text-gray-700 mb-4">
+        Las <strong>combinaciones</strong> se aplican cuando se seleccionan algunos elementos de un conjunto, pero el orden no importa.
+      </p>
+      <img src="../../Recursos/R_TecnicasB/CombinacionIMG.png" alt="Fórmula Combinaciones" class="mx-auto h-44 mb-3">
+      <p class="text-sm text-gray-600">
+        <strong>Variables:</strong>  
+        n = total de elementos, r = elementos seleccionados.  
+        <br><strong>Fórmula:</strong> C(n, r) = n! / [r!(n - r)!]
+      </p>
+    </section>
+
+    <!-- Formulario -->
+    <form id="formCombinaciones" class="bg-white rounded-2xl shadow p-6 border max-w-md mx-auto mb-8">
+      <label class="block mb-2 font-medium text-gray-700">Total de elementos (n):</label>
+      <input type="number" id="n" class="w-full border rounded px-3 py-2 mb-4" min="1" required>
+
+      <label class="block mb-2 font-medium text-gray-700">Elementos seleccionados (r):</label>
+      <input type="number" id="r" class="w-full border rounded px-3 py-2 mb-4" min="1" required>
+
+      <button type="button" onclick="calcularCombinaciones()" class="bg-emerald-700 text-white px-5 py-2 rounded hover:bg-emerald-800 transition">
+        Calcular
+      </button>
+
+      <div id="resultado" class="mt-5 text-center text-lg font-semibold text-emerald-700"></div>
+      <p id="interpretacion" class="text-center text-gray-600 mt-2"></p>
+    </form>
+
+    <!-- Gráfico -->
+    <div class="bg-white p-6 rounded-2xl shadow border text-center">
+      <h3 class="text-lg font-semibold text-emerald-700 mb-4">Visualización</h3>
+      <canvas id="graficoCombinaciones" height="100"></canvas>
+    </div>
+
+    <div class="text-center mt-8">
+      <a href="TecnicasConteoMain.html" class="text-emerald-700 hover:underline">← Volver al tema principal</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-10">
+    <p class="text-sm">
+      Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span>
+    </p>
+  </footer>
+
+  <script>
+    let graficoComb = null;
+
+    function factorial(n) {
+      if (n === 0 || n === 1) return 1n;
+      let resultado = 1n;
+      for (let i = 2n; i <= BigInt(n); i++) {
+        resultado *= i;
+      }
+      return resultado;
+    }
+
+    function formatearResultado(valorBigInt) {
+      const valor = Number(valorBigInt);
+      if (valor === Infinity || valorBigInt > 1_000_000_000_000_000_000n) {
+        const exp = valorBigInt.toString().length - 1;
+        const base = valorBigInt.toString().slice(0, 3);
+        const baseNum = parseFloat(base[0] + "." + base.slice(1));
+        return baseNum.toFixed(3) + " × 10^" + exp;
+      } else if (valor > 1e9) {
+        return valor.toExponential(3).replace("e+", " × 10^").replace("e", " × 10^");
+      } else {
+        return valor.toLocaleString("en-US");
+      }
+    }
+
+    function calcularCombinaciones() {
+      const n = parseInt(document.getElementById("n").value);
+      const r = parseInt(document.getElementById("r").value);
+      const res = document.getElementById("resultado");
+      const interp = document.getElementById("interpretacion");
+
+      if (isNaN(n) || isNaN(r) || n < 1 || r < 1 || r > n) {
+        alert("Verifica los valores de n y r (r ≤ n).");
+        return;
+      }
+
+      const resultado = factorial(n) / (factorial(r) * factorial(n - r));
+      const resultadoFormateado = formatearResultado(resultado);
+
+      res.innerHTML = `Número de combinaciones posibles: <strong>${resultadoFormateado}</strong>`;
+      interp.innerText = `Esto representa las formas diferentes de elegir ${r} elementos de un total de ${n}, sin importar el orden.`;
+
+      if (graficoComb) graficoComb.destroy();
+
+      const ctx = document.getElementById("graficoCombinaciones").getContext("2d");
+      graficoComb = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: ["Combinaciones posibles", "Espacio restante"],
+          datasets: [{
+            data: [Number(resultado), Math.max(1, Number(factorial(n)) / 10)],
+            backgroundColor: ["rgba(16, 185, 129, 0.5)", "rgba(203, 213, 225, 0.4)"]
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+  </script>
+
+</body>
+</html>

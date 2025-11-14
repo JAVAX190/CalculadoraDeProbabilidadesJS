@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Técnicas de Conteo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-emerald-50 to-white text-gray-800">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-8 shadow-lg">
+    <div class="max-w-5xl mx-auto text-center">
+      <h1 class="text-3xl font-bold">Técnicas de Conteo</h1>
+      <p class="text-emerald-100 mt-2 text-lg">Permutaciones · Permutaciones con r · Combinaciones</p>
+    </div>
+  </header>
+
+  <!-- Introducción -->
+  <main class="max-w-6xl mx-auto p-6">
+    <section class="text-center mb-10">
+      <p class="max-w-3xl mx-auto text-gray-700 leading-relaxed text-lg">
+        Las <strong>técnicas de conteo</strong> permiten determinar el número de maneras en que pueden organizarse o seleccionarse elementos.  
+        En este módulo aprenderás los tres métodos fundamentales: las permutaciones, las permutaciones con repetición y las combinaciones.
+      </p>
+    </section>
+
+    <!-- Menú rápido de subtemas -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+      <a href="#permutaciones" class="bg-white rounded-2xl p-6 border shadow hover:shadow-xl hover:-translate-y-1 transition-transform">
+        <div class="text-center">
+          <div class="bg-emerald-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+            <span class="text-3xl">🔄</span>
+          </div>
+          <h3 class="text-xl font-bold text-emerald-700 mb-2">Permutaciones</h3>
+          <p class="text-sm text-gray-600">Orden de todos los elementos distintos.</p>
+        </div>
+      </a>
+
+      <a href="#permutacionesr" class="bg-white rounded-2xl p-6 border shadow hover:shadow-xl hover:-translate-y-1 transition-transform">
+        <div class="text-center">
+          <div class="bg-emerald-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+            <span class="text-3xl">📊</span>
+          </div>
+          <h3 class="text-xl font-bold text-emerald-700 mb-2">Permutaciones con r</h3>
+          <p class="text-sm text-gray-600">Selección ordenada de un subconjunto.</p>
+        </div>
+      </a>
+
+      <a href="#combinaciones" class="bg-white rounded-2xl p-6 border shadow hover:shadow-xl hover:-translate-y-1 transition-transform">
+        <div class="text-center">
+          <div class="bg-emerald-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+            <span class="text-3xl">🧩</span>
+          </div>
+          <h3 class="text-xl font-bold text-emerald-700 mb-2">Combinaciones</h3>
+          <p class="text-sm text-gray-600">Selección sin importar el orden.</p>
+        </div>
+      </a>
+    </section>
+
+    <!-- Subtema 1: Permutaciones -->
+    <section id="permutaciones" class="bg-white rounded-2xl shadow p-6 mb-10 border border-emerald-200">
+      <h2 class="text-2xl font-semibold text-emerald-700 mb-4">🔄 Permutaciones</h2>
+      <p class="text-gray-700 mb-4">
+        Una <strong>permutación</strong> es una forma de organizar todos los elementos de un conjunto, tomando en cuenta el orden.
+        Se aplica cuando todos los elementos son distintos y se usan todos.
+      </p>
+      <p class="text-emerald-700 font-semibold mb-2">Fórmula:</p>
+      <p class="bg-emerald-50 border-l-4 border-emerald-600 px-3 py-2 inline-block mb-4">
+        P(n) = n!
+      </p>
+      <p class="text-gray-600 mb-4">
+        Donde <strong>n</strong> es el número total de elementos, y el símbolo “!” representa el factorial del número.
+      </p>
+      <a href="Permutaciones.html" class="inline-block bg-emerald-600 text-white px-5 py-2 rounded-xl hover:bg-emerald-700 transition">
+        Ir al cálculo →
+      </a>
+    </section>
+
+    <!-- Subtema 2: Permutaciones con r -->
+    <section id="permutacionesr" class="bg-white rounded-2xl shadow p-6 mb-10 border border-teal-200">
+      <h2 class="text-2xl font-semibold text-teal-700 mb-4">📊 Permutaciones con r</h2>
+      <p class="text-gray-700 mb-4">
+        Las <strong>permutaciones con r</strong> se utilizan cuando solo se toman algunos elementos de un conjunto total y el orden de selección importa.
+      </p>
+      <p class="text-teal-700 font-semibold mb-2">Fórmula:</p>
+      <p class="bg-teal-50 border-l-4 border-teal-600 px-3 py-2 inline-block mb-4">
+        P(n, r) = n! / (n - r)!
+      </p>
+      <p class="text-gray-600 mb-4">
+        Donde:
+        <br>• <strong>n</strong> = número total de elementos
+        <br>• <strong>r</strong> = número de elementos seleccionados
+      </p>
+      <a href="PermutacionR.html" class="inline-block bg-teal-600 text-white px-5 py-2 rounded-xl hover:bg-teal-700 transition">
+        Ir al cálculo →
+      </a>
+    </section>
+
+    <!-- Subtema 3: Combinaciones -->
+    <section id="combinaciones" class="bg-white rounded-2xl shadow p-6 mb-10 border border-emerald-300">
+      <h2 class="text-2xl font-semibold text-emerald-700 mb-4">🧩 Combinaciones</h2>
+      <p class="text-gray-700 mb-4">
+        Las <strong>combinaciones</strong> se utilizan cuando se seleccionan algunos elementos de un conjunto, pero el orden no importa.
+      </p>
+      <p class="text-emerald-700 font-semibold mb-2">Fórmula:</p>
+      <p class="bg-emerald-50 border-l-4 border-emerald-600 px-3 py-2 inline-block mb-4">
+        C(n, r) = n! / [r!(n - r)!]
+      </p>
+      <p class="text-gray-600 mb-4">
+        Donde:
+        <br>• <strong>n</strong> = número total de elementos
+        <br>• <strong>r</strong> = elementos seleccionados
+      </p>
+      <a href="Combinaciones.html" class="inline-block bg-emerald-700 text-white px-5 py-2 rounded-xl hover:bg-emerald-800 transition">
+        Ir al cálculo →
+      </a>
+    </section>
+
+    <!-- Botón volver -->
+    <div class="text-center mt-10">
+      <a href="../../index.html" class="inline-block bg-emerald-600 text-white px-6 py-2 rounded-xl hover:bg-emerald-700 transition">
+        ← Volver al inicio
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-10">
+    <p class="text-sm">
+      Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span>
+    </p>
+  </footer>
+</body>
+</html>

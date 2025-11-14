@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regla de la Suma</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-pink-50 to-white text-gray-800">
+
+  <!-- Encabezado -->
+  <header class="bg-pink-600 text-white py-6 text-center shadow-md">
+    <h1 class="text-3xl font-bold">Regla de la Suma</h1>
+    <p class="text-pink-100">Eventos excluyentes y no excluyentes</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+
+    <!-- Introducción -->
+    <section class="text-center mb-6">
+      <p class="text-gray-700 mb-4">
+        La <strong>regla de la suma</strong> permite calcular la probabilidad de que ocurra el evento A o el evento B.  
+        Puede aplicarse a eventos <strong>excluyentes</strong> o <strong>no excluyentes</strong>:
+      </p>
+      <ul class="text-left mx-auto w-fit text-sm text-gray-700 mb-4">
+        <li>🔹 <strong>Excluyentes:</strong> \( P(A ∪ B) = P(A) + P(B) \)</li>
+        <li>🔸 <strong>No excluyentes:</strong> \( P(A ∪ B) = P(A) + P(B) - P(A ∩ B) \)</li>
+      </ul>
+      <img src="../../Recursos/R_ConceptosBasicosP/ReglaDeLaSuma.jpg" alt="Regla de la suma" class="mx-auto h-44 mb-3 rounded-xl shadow-lg">
+    </section>
+
+    <!-- Selector de tipo -->
+    <section class="mb-6 text-center">
+      <label class="font-semibold text-pink-700">Selecciona el tipo de eventos:</label>
+      <div class="mt-3">
+        <button onclick="seleccionarTipo('excluyente')" class="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700">Excluyentes</button>
+        <button onclick="seleccionarTipo('no_excluyente')" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">No Excluyentes</button>
+      </div>
+    </section>
+
+    <!-- Formulario -->
+    <section id="formulario" class="bg-white shadow rounded-2xl p-6 border hidden">
+      <h2 id="tituloTipo" class="text-lg font-semibold text-pink-700 mb-4"></h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">P(A)</label>
+          <input type="number" id="pA" step="any" min="0" max="1" class="w-full border rounded px-3 py-2" placeholder="Ej. 0.3">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">P(B)</label>
+          <input type="number" id="pB" step="any" min="0" max="1" class="w-full border rounded px-3 py-2" placeholder="Ej. 0.4">
+        </div>
+        <div id="campoInterseccion" class="hidden">
+          <label class="block text-sm font-medium text-gray-700">P(A ∩ B)</label>
+          <input type="number" id="pInter" step="any" min="0" max="1" class="w-full border rounded px-3 py-2" placeholder="Ej. 0.1">
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button onclick="calcularSuma()" class="bg-pink-600 text-white px-5 py-2 rounded hover:bg-pink-700">Calcular</button>
+      </div>
+
+      <div id="resultado" class="mt-6 text-center text-lg font-semibold"></div>
+
+      <div id="graficaContenedor" class="hidden mt-8">
+        <canvas id="grafica"></canvas>
+      </div>
+    </section>
+
+    <!-- Botón volver -->
+    <div class="text-center mt-10">
+      <a href="ConceptosBasicMain.html" class="text-pink-700 hover:underline">← Volver al tema principal</a>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 text-center py-4 mt-10">
+    <p>Estadística I – 2025 · Desarrollado por <span class="font-semibold">Javier Baudilio Soto Rosales</span></p>
+  </footer>
+
+  <script>
+    let tipoSeleccionado = '';
+    let grafica = null;
+
+    function seleccionarTipo(tipo) {
+      tipoSeleccionado = tipo;
+      document.getElementById('formulario').classList.remove('hidden');
+
+      if (tipo === 'excluyente') {
+        document.getElementById('campoInterseccion').classList.add('hidden');
+        document.getElementById('tituloTipo').textContent = "Eventos Excluyentes – P(A ∪ B) = P(A) + P(B)";
+      } else {
+        document.getElementById('campoInterseccion').classList.remove('hidden');
+        document.getElementById('tituloTipo').textContent = "Eventos No Excluyentes – P(A ∪ B) = P(A) + P(B) - P(A ∩ B)";
+      }
+      document.getElementById('resultado').textContent = "";
+      document.getElementById('graficaContenedor').classList.add('hidden');
+    }
+
+    function calcularSuma() {
+      const pA = parseFloat(document.getElementById('pA').value);
+      const pB = parseFloat(document.getElementById('pB').value);
+      const pInter = parseFloat(document.getElementById('pInter').value || 0);
+
+      if (isNaN(pA) || isNaN(pB) || pA < 0 || pA > 1 || pB < 0 || pB > 1) {
+        alert("Por favor, ingresa probabilidades válidas (entre 0 y 1).");
+        return;
+      }
+
+      let resultado;
+      if (tipoSeleccionado === 'excluyente') {
+        resultado = pA + pB;
+      } else {
+        if (isNaN(pInter) || pInter < 0 || pInter > 1) {
+          alert("Por favor, ingresa un valor válido para P(A ∩ B).");
+          return;
+        }
+        resultado = pA + pB - pInter;
+      }
+
+      // Mostrar resultado y formato científico si es necesario
+      const textoResultado = resultado.toExponential(3).replace(".", ",");
+      document.getElementById('resultado').innerHTML =
+        `📊 <strong>P(A ∪ B) = ${textoResultado}</strong><br><span class="text-sm text-gray-600">(${tipoSeleccionado === 'excluyente' ? 'Eventos Excluyentes' : 'Eventos No Excluyentes'})</span>`;
+
+      generarGrafica(pA, pB, resultado);
+    }
+
+    function generarGrafica(pA, pB, resultado) {
+      const ctx = document.getElementById('grafica');
+      document.getElementById('graficaContenedor').classList.remove('hidden');
+
+      if (grafica) grafica.destroy();
+
+      grafica = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['P(A)', 'P(B)', 'P(A ∪ B)'],
+          datasets: [{
+            label: 'Probabilidades',
+            data: [pA, pB, resultado],
+            backgroundColor: ['#ec4899', '#f59e0b', '#9333ea']
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 1
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
